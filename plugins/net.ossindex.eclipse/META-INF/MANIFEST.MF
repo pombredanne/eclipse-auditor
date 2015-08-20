@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OSS Index
+Bundle-SymbolicName: net.ossindex.eclipse;singleton:=true
+Bundle-Version: 0.0.1.qualifier
+Bundle-Activator: net.ossindex.eclipse.Activator
+Bundle-Vendor: Vör Security Inc.
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ net.ossindex.common;bundle-version="0.0.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
