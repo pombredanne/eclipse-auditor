@@ -34,6 +34,7 @@ import net.ossindex.eclipse.OssIndexResourceManager;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -100,27 +101,44 @@ public class OssIndexDecorator implements ILightweightLabelDecorator
 		if(resource instanceof IFile)
 		{
 			IFile ifile = (IFile)resource;
+			FileResource ossResource = null;
 			if(!failedConnection)
 			{
 				try
 				{
-					FileResource ossResource = OssIndexResourceManager.getInstance().getNonBlockingFileResource(ifile);
-					if(ossResource != null && ossResource.exists())
-					{
-						URL url = FileLocator.find(Platform.getBundle("net.ossindex.eclipse"), new Path(iconPath), null); //NON-NLS-1
-						descriptor = ImageDescriptor.createFromURL(url);			
-						quadrant = IDecoration.TOP_RIGHT;
-						decoration.addOverlay(descriptor,quadrant);
-					}
+					ossResource = OssIndexResourceManager.getInstance().getNonBlockingFileResource(ifile);
 				}
 				catch(OssIndexConnectionException e)
 				{
 					failedConnection  = true;
 				}
 			}
-			else
+			
+			// On a failed connection, check the cache to see if we can work in offline
+			// mode, otherwise indicate the connection problem.
+			if(failedConnection)
 			{
-				URL url = FileLocator.find(Platform.getBundle("net.ossindex.eclipse"), new Path(failIconPath), null); //NON-NLS-1
+				try
+				{
+					ossResource = OssIndexResourceManager.getInstance().getCachedResource(ifile);
+				}
+				catch (CoreException coreE)
+				{
+					coreE.printStackTrace();
+				}
+				if(ossResource == null)
+				{
+					URL url = FileLocator.find(Platform.getBundle("net.ossindex.eclipse"), new Path(failIconPath), null); //NON-NLS-1
+					descriptor = ImageDescriptor.createFromURL(url);			
+					quadrant = IDecoration.TOP_RIGHT;
+					decoration.addOverlay(descriptor,quadrant);
+				}
+			}
+			
+			// Set the decorator for the file
+			if(ossResource != null && ossResource.exists())
+			{
+				URL url = FileLocator.find(Platform.getBundle("net.ossindex.eclipse"), new Path(iconPath), null); //NON-NLS-1
 				descriptor = ImageDescriptor.createFromURL(url);			
 				quadrant = IDecoration.TOP_RIGHT;
 				decoration.addOverlay(descriptor,quadrant);

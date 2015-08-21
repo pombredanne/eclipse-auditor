@@ -44,6 +44,12 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 /** Manage the creation of OSS Index resources for Eclipse IResources. Caches
  * OSS Index resources to reduce bandwidth consumption.
  * 
+ * The resource manager prevents hitting the API by caching information and
+ * restricting accessing on restarts closer than 12 hours apart.
+ * 
+ * Future versions will reduce the query rate for refreshes, so that initial
+ * access is fast but subsequent access is nicer.
+ * 
  * @author Ken Duck
  *
  */
@@ -51,10 +57,18 @@ public class OssIndexResourceManager extends JobChangeAdapter
 {
 	private static OssIndexResourceManager instance = null;
 
+	private static final long ONE_HOUR = 3600000;
+	/**
+	 * Request a refresh on new (un-cached) visits after 12 hours.
+	 */
+	private static final long UPDATE_REQUIRED = ONE_HOUR * 12;
+
 	/**
 	 * Qualified name for saving properties to IFiles
 	 */
-	public static QualifiedName qname = new QualifiedName(Activator.PLUGIN_ID, "OssIndexResource");
+	public static QualifiedName RESOURCE_NAME = new QualifiedName(Activator.PLUGIN_ID, "OssIndexResource");
+	public static QualifiedName ID_NAME = new QualifiedName(Activator.PLUGIN_ID, "OssIndexResource.Id");
+	public static QualifiedName TIMESTAMP = new QualifiedName(Activator.PLUGIN_ID, "OssIndexResource.Timestamp");
 
 	/**
 	 * Buffer of files to cache.
@@ -99,7 +113,7 @@ public class OssIndexResourceManager extends JobChangeAdapter
 		FileResource fresource = null;
 		try
 		{
-			fresource = (FileResource) ifile.getSessionProperty(qname);
+			fresource = getCachedResource(ifile);
 
 			if(fresource == null)
 			{
@@ -140,7 +154,7 @@ public class OssIndexResourceManager extends JobChangeAdapter
 	{
 		try
 		{
-			FileResource fresource = (FileResource) ifile.getSessionProperty(qname);
+			FileResource fresource = getCachedResource(ifile);
 			if(fresource != null) return fresource;
 		}
 		catch(CoreException e)
@@ -153,6 +167,54 @@ public class OssIndexResourceManager extends JobChangeAdapter
 		return null;
 	}
 	
+	/** Get a resource from the session cache. Barring that use the persistent cache.
+	 * This will allow for offline viewing.
+	 * 
+	 * @param ifile
+	 * @return
+	 * @throws CoreException
+	 */
+	public FileResource getCachedResource(IFile ifile) throws CoreException
+	{
+		FileResource resource = (FileResource) ifile.getSessionProperty(RESOURCE_NAME);
+		
+		if(resource == null)
+		{
+			String id = ifile.getPersistentProperty(ID_NAME);
+			if(id != null)
+			{
+				try
+				{
+					long lid = Long.parseLong(id);
+					resource = new FileResource(lid);
+					
+					// Check to see if an update is required. We do this to ensure
+					// that repeated restarts do not hit the database too often.
+					try
+					{
+						long now = System.currentTimeMillis();
+						long timestamp = Long.parseLong(ifile.getPersistentProperty(TIMESTAMP));
+						if(now - timestamp > UPDATE_REQUIRED)
+						{
+							updateBuffer(ifile);
+						}
+					}
+					catch(NumberFormatException e)
+					{
+						updateBuffer(ifile);
+					}
+				}
+				catch(OssIndexConnectionException e)
+				{
+					// Ignore for now. It will be detected elsewhere.
+				}
+				catch(NumberFormatException e) {}
+			}
+		}
+		return resource;
+	}
+
+	
 	/** Called to update the buffer and possibly run the cache job on the buffer.
 	 * 
 	 * Synchronized to protect the buffer.
@@ -162,7 +224,14 @@ public class OssIndexResourceManager extends JobChangeAdapter
 	 */
 	private synchronized void updateBuffer(IFile ifile) throws OssIndexConnectionException
 	{
-		if(ifile != null) buffer.add(ifile);
+		if(ifile != null)
+		{
+			// Make sure this isn't already buffered and in progress
+			if(job != null && !job.contains(ifile))
+			{
+				buffer.add(ifile);
+			}
+		}
 		if(job == null || job.getState() == Job.NONE)
 		{
 			// (Re) Create the job

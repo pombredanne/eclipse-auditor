@@ -29,20 +29,18 @@ package net.ossindex.eclipse;
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.util.Date;
 import java.util.Set;
 
 import net.ossindex.common.resource.FileResource;
 import net.ossindex.eclipse.decorators.OssIndexDecorator;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IDecoratorManager;
 import org.eclipse.ui.IWorkbench;
@@ -95,12 +93,20 @@ public class OssIndexCacheJob extends Job
 					FileResource fresource = FileResource.find(file);
 					if(fresource != null)
 					{
-						ifile.setSessionProperty(OssIndexResourceManager.qname, fresource);
+						ifile.setSessionProperty(OssIndexResourceManager.RESOURCE_NAME, fresource);
+						
+						// Write persistent properties for offline viewing
+						ifile.setPersistentProperty(OssIndexResourceManager.ID_NAME, Long.toString(fresource.getId()));
 					}
 					else
 					{
-						ifile.setSessionProperty(OssIndexResourceManager.qname, new FileResource(-1));
+						ifile.setSessionProperty(OssIndexResourceManager.RESOURCE_NAME, new FileResource(-1));
+						ifile.setPersistentProperty(OssIndexResourceManager.ID_NAME, "-1");
 					}
+					
+					// Write the time this was last updated
+					long now = System.currentTimeMillis();
+					ifile.setPersistentProperty(OssIndexResourceManager.TIMESTAMP, Long.toString(now));
 				}
 				catch (ConnectException e)
 				{
@@ -132,5 +138,15 @@ public class OssIndexCacheJob extends Job
 			});
 		}
 		return Status.OK_STATUS;
+	}
+
+	/** Return true if the specified file is in our buffer
+	 * 
+	 * @param ifile
+	 * @return
+	 */
+	public boolean contains(IFile ifile)
+	{
+		return buffer.contains(ifile);
 	}
 }
