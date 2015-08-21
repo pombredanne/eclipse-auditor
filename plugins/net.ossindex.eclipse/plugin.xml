@@ -23,7 +23,7 @@
             class="net.ossindex.eclipse.decorators.OssIndexDecorator"
             icon="icons/ossi-decorator.png"
             id="net.ossindex.eclipse.decorators.OssIndexDecorator"
-            label="Read-only Decorator"
+            label="OSS Index Decorator"
             lightweight="true"
             state="true">
          <enablement>

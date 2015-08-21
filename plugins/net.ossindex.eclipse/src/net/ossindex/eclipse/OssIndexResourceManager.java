@@ -29,12 +29,17 @@ package net.ossindex.eclipse;
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.ossindex.common.resource.FileResource;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 /** Manage the creation of OSS Index resources for Eclipse IResources. Caches
  * OSS Index resources to reduce bandwidth consumption.
@@ -42,19 +47,31 @@ import org.eclipse.core.resources.IFile;
  * @author Ken Duck
  *
  */
-public class OssIndexResourceManager
+public class OssIndexResourceManager extends JobChangeAdapter
 {
 	private static OssIndexResourceManager instance = null;
-	
+
 	/**
-	 * Map of IFile to FileResource
+	 * Qualified name for saving properties to IFiles
 	 */
-	private Map<IFile,FileResource> map = new HashMap<IFile,FileResource>();
-	
+	public static QualifiedName qname = new QualifiedName(Activator.PLUGIN_ID, "OssIndexResource");
+
+	/**
+	 * Buffer of files to cache.
+	 * 
+	 * WARNING: Only use in updateBuffer method.
+	 */
+	private Set<IFile> buffer = new HashSet<IFile>();
+
+	/**
+	 * Job for caching OssIndexResources for IFiles
+	 */
+	private OssIndexCacheJob job = null;
+
 	private OssIndexResourceManager()
 	{
 	}
-	
+
 	/** Get the manager instance.
 	 * 
 	 * @return
@@ -67,9 +84,11 @@ public class OssIndexResourceManager
 		}
 		return instance;
 	}
-	
+
 	/** Get the OSS Index File Resource associated with a particular file, if there
 	 * is one.
+	 * 
+	 * Note that this blocks on web access.
 	 * 
 	 * @param ifile
 	 * @return
@@ -77,28 +96,102 @@ public class OssIndexResourceManager
 	 */
 	public FileResource getFileResource(IFile ifile) throws OssIndexConnectionException
 	{
-		if(!map.containsKey(ifile))
+		FileResource fresource = null;
+		try
 		{
-			File file = ifile.getLocation().toFile();
-			try
+			fresource = (FileResource) ifile.getSessionProperty(qname);
+
+			if(fresource == null)
 			{
-				FileResource fresource = FileResource.find(file);
-				map.put(ifile, fresource);
-				return fresource;
-			}
-			catch (ConnectException e)
-			{
-				// Failed connection. Don't try any more.
-				throw new OssIndexConnectionException(e);
-			}
-			catch (IOException e)
-			{
-				// Something went wrong.
-				e.printStackTrace();
-				map.put(ifile, null);
+				File file = ifile.getLocation().toFile();
+				try
+				{
+					fresource = FileResource.find(file);
+					return fresource;
+				}
+				catch (ConnectException e)
+				{
+					// Failed connection. Don't try any more.
+					throw new OssIndexConnectionException(e);
+				}
+				catch (IOException e)
+				{
+					// Something went wrong.
+					e.printStackTrace();
+				}
 			}
 		}
-		
-		return map.get(ifile);
+		catch(CoreException e)
+		{
+			// Something went wrong.
+			e.printStackTrace();
+		}
+		return fresource;
+	}
+
+	/** Get the file resource in a non-blocking way. If the resource has not
+	 * been loaded yet then return null, but schedule the loading of the resource.
+	 * 
+	 * @param ifile
+	 * @return
+	 * @throws OssIndexConnectionException 
+	 */
+	public FileResource getNonBlockingFileResource(IFile ifile) throws OssIndexConnectionException
+	{
+		try
+		{
+			FileResource fresource = (FileResource) ifile.getSessionProperty(qname);
+			if(fresource != null) return fresource;
+		}
+		catch(CoreException e)
+		{
+			// Something went wrong.
+			e.printStackTrace();
+		}
+
+		updateBuffer(ifile);
+		return null;
+	}
+	
+	/** Called to update the buffer and possibly run the cache job on the buffer.
+	 * 
+	 * Synchronized to protect the buffer.
+	 * 
+	 * @param ifile File to add to the buffer, null if nothing to add.
+	 * @throws OssIndexConnectionException
+	 */
+	private synchronized void updateBuffer(IFile ifile) throws OssIndexConnectionException
+	{
+		if(ifile != null) buffer.add(ifile);
+		if(job == null || job.getState() == Job.NONE)
+		{
+			// (Re) Create the job
+			job = new OssIndexCacheJob(buffer);
+			// Detach the buffer
+			buffer = new HashSet<IFile>();
+			// Start the job
+			job.addJobChangeListener(this);
+			job.setPriority(Job.DECORATE);
+			job.schedule();
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.runtime.jobs.JobChangeAdapter#done(org.eclipse.core.runtime.jobs.IJobChangeEvent)
+	 */
+	@Override
+	public void done(IJobChangeEvent event)
+	{
+		// Give the queue a kick
+		try
+		{
+			updateBuffer(null);
+		}
+		catch (OssIndexConnectionException e)
+		{
+			// Something went wrong
+			e.printStackTrace();
+		}
 	}
 }

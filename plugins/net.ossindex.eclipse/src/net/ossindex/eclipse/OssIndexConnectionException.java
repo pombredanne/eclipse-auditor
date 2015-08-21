@@ -26,7 +26,6 @@
  */
 package net.ossindex.eclipse;
 
-import java.net.ConnectException;
 
 /** Exception thrown when the connection to OSS Index is lost
  * 
@@ -35,7 +34,7 @@ import java.net.ConnectException;
  */
 public class OssIndexConnectionException extends Exception
 {
-	public OssIndexConnectionException(ConnectException e)
+	public OssIndexConnectionException(Exception e)
 	{
 		super(e);
 	}

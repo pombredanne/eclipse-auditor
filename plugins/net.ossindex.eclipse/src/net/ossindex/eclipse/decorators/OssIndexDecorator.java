@@ -49,7 +49,9 @@ import org.eclipse.jface.viewers.ILightweightLabelDecorator;
  * 
  * @see ILightweightLabelDecorator
  */
-public class OssIndexDecorator implements ILightweightLabelDecorator {
+public class OssIndexDecorator implements ILightweightLabelDecorator
+{
+	public static final String ID = "net.ossindex.eclipse.decorators.OssIndexDecorator";
 	/**
 	 * String constants for the various icon placement options from the template
 	 * wizard.
@@ -102,8 +104,8 @@ public class OssIndexDecorator implements ILightweightLabelDecorator {
 			{
 				try
 				{
-					FileResource ossResource = OssIndexResourceManager.getInstance().getFileResource(ifile);
-					if(ossResource != null)
+					FileResource ossResource = OssIndexResourceManager.getInstance().getNonBlockingFileResource(ifile);
+					if(ossResource != null && ossResource.exists())
 					{
 						URL url = FileLocator.find(Platform.getBundle("net.ossindex.eclipse"), new Path(iconPath), null); //NON-NLS-1
 						descriptor = ImageDescriptor.createFromURL(url);			
