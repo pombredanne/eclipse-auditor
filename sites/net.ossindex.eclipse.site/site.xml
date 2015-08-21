@@ -1,3 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
+   <feature url="features/net.ossindex.eclipse.feature_0.0.1.qualifier.jar" id="net.ossindex.eclipse.feature" version="0.0.1.qualifier">
+      <category name="OSS Index"/>
+   </feature>
+   <category-def name="OSS Index" label="OSS Index Core"/>
 </site>

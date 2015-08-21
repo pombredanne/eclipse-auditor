@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="net.ossindex.eclipse.feature"
-      label="OSS Index Core"
+      label="OSS Index Core Feature"
       version="0.0.1.qualifier">
 
    <description url="http://ossindex.net/eclipse">
