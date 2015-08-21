@@ -62,6 +62,8 @@ public class OssIndexResourceManager extends JobChangeAdapter
 	 * Request a refresh on new (un-cached) visits after 12 hours.
 	 */
 	private static final long UPDATE_REQUIRED = ONE_HOUR * 12;
+	// Enable for debug purposes only. Its not nice to the server.
+	// private static final long UPDATE_REQUIRED = 0;
 
 	/**
 	 * Qualified name for saving properties to IFiles

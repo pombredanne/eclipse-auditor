@@ -173,7 +173,7 @@ public class OssIndexPropertyPage extends PropertyPage
 			try
 			{
 				FileResource ossResource = OssIndexResourceManager.getInstance().getFileResource((IFile)resource);
-				if(ossResource != null)
+				if(ossResource != null && ossResource.exists())
 				{
 					addFirstSection(composite, (IFile) resource);
 //					addSeparator(composite);

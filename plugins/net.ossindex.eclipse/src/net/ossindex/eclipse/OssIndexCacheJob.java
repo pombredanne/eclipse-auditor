@@ -29,7 +29,6 @@ package net.ossindex.eclipse;
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.util.Date;
 import java.util.Set;
 
 import net.ossindex.common.resource.FileResource;
@@ -85,47 +84,41 @@ public class OssIndexCacheJob extends Job
 	{
 		if(buffer != null && !buffer.isEmpty())
 		{
+			IFile[] ifiles = new IFile[buffer.size()];
+			File[] files = new File[buffer.size()];
+			int i = 0;
+
+			// Perform the query in chunks
 			for(IFile ifile: buffer)
 			{
 				File file = ifile.getLocation().toFile();
-				try
-				{
-					FileResource fresource = FileResource.find(file);
-					if(fresource != null)
-					{
-						ifile.setSessionProperty(OssIndexResourceManager.RESOURCE_NAME, fresource);
-						
-						// Write persistent properties for offline viewing
-						ifile.setPersistentProperty(OssIndexResourceManager.ID_NAME, Long.toString(fresource.getId()));
-					}
-					else
-					{
-						ifile.setSessionProperty(OssIndexResourceManager.RESOURCE_NAME, new FileResource(-1));
-						ifile.setPersistentProperty(OssIndexResourceManager.ID_NAME, "-1");
-					}
-					
-					// Write the time this was last updated
-					long now = System.currentTimeMillis();
-					ifile.setPersistentProperty(OssIndexResourceManager.TIMESTAMP, Long.toString(now));
-				}
-				catch (ConnectException e)
-				{
-					// Failed connection. Don't try any more.
-					failedConnection = e;
-				}
-				catch (IOException e)
-				{
-					// Something went wrong.
-					e.printStackTrace();
-				}
-				catch (CoreException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
+				files[i] = file;
+				ifiles[i] = ifile;
+				i++;
 			}
-			
+
+			try
+			{
+				FileResource[] resources = FileResource.find(files);
+				if(resources != null)
+				{
+					for (int j = 0; j < resources.length; j++)
+					{
+						updateResource(resources[j], ifiles[j]);
+					}
+				}
+			}
+			catch (ConnectException e)
+			{
+				// Failed connection. Don't try any more.
+				failedConnection = e;
+			}
+			catch (IOException e)
+			{
+				// Something went wrong.
+				e.printStackTrace();
+			}
+
 			// Decorate using current UI thread
 			Display.getDefault().asyncExec(new Runnable()
 			{
@@ -138,6 +131,39 @@ public class OssIndexCacheJob extends Job
 			});
 		}
 		return Status.OK_STATUS;
+	}
+
+	/** For a given FileResource and IFile, update the appropriate properties.
+	 * 
+	 * @param fresource
+	 * @param ifile
+	 */
+	private void updateResource(FileResource fresource, IFile ifile)
+	{
+		try
+		{
+			if(fresource != null && fresource.exists())
+			{
+				ifile.setSessionProperty(OssIndexResourceManager.RESOURCE_NAME, fresource);
+
+				// Write persistent properties for offline viewing
+				ifile.setPersistentProperty(OssIndexResourceManager.ID_NAME, Long.toString(fresource.getId()));
+			}
+			else
+			{
+				ifile.setSessionProperty(OssIndexResourceManager.RESOURCE_NAME, new FileResource(-1));
+				ifile.setPersistentProperty(OssIndexResourceManager.ID_NAME, "-1");
+			}
+
+			// Write the time this was last updated
+			long now = System.currentTimeMillis();
+			ifile.setPersistentProperty(OssIndexResourceManager.TIMESTAMP, Long.toString(now));
+		}
+		catch (CoreException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/** Return true if the specified file is in our buffer

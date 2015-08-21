@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/net.ossindex.eclipse.feature_0.0.1.201508202114.jar" id="net.ossindex.eclipse.feature" version="0.0.1.201508202114">
+   <feature url="features/net.ossindex.eclipse.feature_0.0.1.201508210253.jar" id="net.ossindex.eclipse.feature" version="0.0.1.201508210253">
       <category name="OSS Index"/>
    </feature>
    <category-def name="OSS Index" label="OSS Index Core"/>
