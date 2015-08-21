@@ -26,79 +26,23 @@
  */
 package net.ossindex.eclipse;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.ConnectException;
-import java.util.HashMap;
-import java.util.Map;
 
-import net.ossindex.common.resource.FileResource;
-
-import org.eclipse.core.resources.IFile;
-
-/** Manage the creation of OSS Index resources for Eclipse IResources. Caches
- * OSS Index resources to reduce bandwidth consumption.
+/** Exception thrown when the connection to OSS Index is lost
  * 
  * @author Ken Duck
  *
  */
-public class OssIndexResourceManager
+public class OssIndexConnectionException extends Exception
 {
-	private static OssIndexResourceManager instance = null;
-	
+	public OssIndexConnectionException(ConnectException e)
+	{
+		super(e);
+	}
+
 	/**
-	 * Map of IFile to FileResource
-	 */
-	private Map<IFile,FileResource> map = new HashMap<IFile,FileResource>();
-	
-	private OssIndexResourceManager()
-	{
-	}
-	
-	/** Get the manager instance.
 	 * 
-	 * @return
 	 */
-	public static OssIndexResourceManager getInstance()
-	{
-		if(instance == null)
-		{
-			instance = new OssIndexResourceManager();
-		}
-		return instance;
-	}
-	
-	/** Get the OSS Index File Resource associated with a particular file, if there
-	 * is one.
-	 * 
-	 * @param ifile
-	 * @return
-	 * @throws OssIndexConnectionException 
-	 */
-	public FileResource getFileResource(IFile ifile) throws OssIndexConnectionException
-	{
-		if(!map.containsKey(ifile))
-		{
-			File file = ifile.getLocation().toFile();
-			try
-			{
-				FileResource fresource = FileResource.find(file);
-				map.put(ifile, fresource);
-				return fresource;
-			}
-			catch (ConnectException e)
-			{
-				// Failed connection. Don't try any more.
-				throw new OssIndexConnectionException(e);
-			}
-			catch (IOException e)
-			{
-				// Something went wrong.
-				e.printStackTrace();
-				map.put(ifile, null);
-			}
-		}
-		
-		return map.get(ifile);
-	}
+	private static final long serialVersionUID = 9164842576498675216L;
+
 }

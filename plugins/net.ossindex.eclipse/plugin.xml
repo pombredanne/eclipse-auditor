@@ -8,11 +8,11 @@
             name="OSS Index"
             nameFilter="*.*"
             class="net.ossindex.eclipse.properties.OssIndexPropertyPage"
-            id="net.ossindex.eclipse.properties.samplePropertyPage">
+            id="net.ossindex.eclipse.properties.OssIndexPropertyPage">
          <enabledWhen>
-            <instanceof
-                  value="org.eclipse.core.resources.IFile">
-            </instanceof>
+            <adapt
+                  type="org.eclipse.core.resources.IFile">
+            </adapt>
          </enabledWhen>
       </page>
    </extension>

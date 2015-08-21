@@ -1,18 +1,35 @@
-/*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
+/**
+ *	Copyright (c) 2015 Vör Security Inc.
+ *	All rights reserved.
+ *	
+ *	Redistribution and use in source and binary forms, with or without
+ *	modification, are permitted provided that the following conditions are met:
+ *	    * Redistributions of source code must retain the above copyright
+ *	      notice, this list of conditions and the following disclaimer.
+ *	    * Redistributions in binary form must reproduce the above copyright
+ *	      notice, this list of conditions and the following disclaimer in the
+ *	      documentation and/or other materials provided with the distribution.
+ *	    * Neither the name of the <organization> nor the
+ *	      names of its contributors may be used to endorse or promote products
+ *	      derived from this software without specific prior written permission.
+ *	
+ *	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *	DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ *	DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *	ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package net.ossindex.eclipse.decorators;
 
 import java.net.URL;
 
 import net.ossindex.common.resource.FileResource;
+import net.ossindex.eclipse.OssIndexConnectionException;
 import net.ossindex.eclipse.OssIndexResourceManager;
 
 import org.eclipse.core.resources.IFile;
@@ -52,12 +69,19 @@ public class OssIndexDecorator implements ILightweightLabelDecorator {
 
 	/** The icon image location in the project folder */
 	private String iconPath = "icons/ossi-decorator.png"; //NON-NLS-1
+	private String failIconPath = "icons/ossi-decorator-fail.png"; //NON-NLS-1
 
 	/**
 	 * The image description used in
 	 * <code>addOverlay(ImageDescriptor, int)</code>
 	 */
 	private ImageDescriptor descriptor;
+
+	/**
+	 * Set to true when the connection is bad, so we don't waste time trying
+	 * to connect any further.
+	 */
+	private boolean failedConnection = false;
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ILightweightLabelDecorator#decorate(java.lang.Object, org.eclipse.jface.viewers.IDecoration)
@@ -70,14 +94,31 @@ public class OssIndexDecorator implements ILightweightLabelDecorator {
 		 * integer representation of the placement option.
 		 */
 		IResource resource = (IResource) element;
-		
+
 		if(resource instanceof IFile)
 		{
 			IFile ifile = (IFile)resource;
-			FileResource ossResource = OssIndexResourceManager.getInstance().getFileResource(ifile);
-			if(ossResource != null)
+			if(!failedConnection)
 			{
-				URL url = FileLocator.find(Platform.getBundle("net.ossindex.eclipse"), new Path(iconPath), null); //NON-NLS-1
+				try
+				{
+					FileResource ossResource = OssIndexResourceManager.getInstance().getFileResource(ifile);
+					if(ossResource != null)
+					{
+						URL url = FileLocator.find(Platform.getBundle("net.ossindex.eclipse"), new Path(iconPath), null); //NON-NLS-1
+						descriptor = ImageDescriptor.createFromURL(url);			
+						quadrant = IDecoration.TOP_RIGHT;
+						decoration.addOverlay(descriptor,quadrant);
+					}
+				}
+				catch(OssIndexConnectionException e)
+				{
+					failedConnection  = true;
+				}
+			}
+			else
+			{
+				URL url = FileLocator.find(Platform.getBundle("net.ossindex.eclipse"), new Path(failIconPath), null); //NON-NLS-1
 				descriptor = ImageDescriptor.createFromURL(url);			
 				quadrant = IDecoration.TOP_RIGHT;
 				decoration.addOverlay(descriptor,quadrant);
