@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.ui.PlatformUI;
 
 /** Manage the creation of OSS Index resources for Eclipse IResources. Caches
  * OSS Index resources to reduce bandwidth consumption.
@@ -241,9 +242,12 @@ public class OssIndexResourceManager extends JobChangeAdapter
 			// Detach the buffer
 			buffer = new HashSet<IFile>();
 			// Start the job
-			job.addJobChangeListener(this);
-			job.setPriority(Job.DECORATE);
-			job.schedule();
+			if(PlatformUI.isWorkbenchRunning())
+			{
+				job.addJobChangeListener(this);
+				job.setPriority(Job.DECORATE);
+				job.schedule();
+			}
 		}
 	}
 

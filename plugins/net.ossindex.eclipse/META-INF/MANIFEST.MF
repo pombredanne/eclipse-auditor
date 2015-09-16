@@ -8,6 +8,7 @@ Bundle-Vendor: Vör Security Inc.
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
- net.ossindex.common;bundle-version="0.0.1"
+ net.ossindex.common;bundle-version="0.0.1",
+ net.ossindex.eclipse.common;bundle-version="1.0.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
