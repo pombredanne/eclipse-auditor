@@ -35,7 +35,8 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-/**
+/** Identify files with known dependencies. Using this information attempt to find
+ * vulnerability information.
  * 
  * @author Ken Duck
  *
