@@ -125,15 +125,60 @@
       </menuContribution>
    </extension>
    <extension
-         id="xmlProblem"
-         name="XML Problem"
+         id="net.ossindex.eclipse.marker.DependencyMarker"
+         name="Dependency"
          point="org.eclipse.core.resources.markers">
       <super
-            type="org.eclipse.core.resources.problemmarker">
+            type="org.eclipse.core.resources.textmarker">
       </super>
       <persistent
             value="true">
       </persistent>
+      <attribute
+            name="net.ossindex.eclipse.marker.name">
+      </attribute>
+      <attribute
+            name="net.ossindex.eclipse.marker.version">
+      </attribute>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerType="net.ossindex.eclipse.marker.DependencyMarker"
+            name="net.ossindex.eclipse.marker.DependencyMarker">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="net.ossindex.eclipse.marker.DependencyMarker"
+            colorPreferenceKey="net.ossindex.eclipse.marker.color"
+            colorPreferenceValue="192,255,192"
+            contributesToHeader="false"
+            highlightPreferenceKey="net.ossindex.eclipse.marker.highlight"
+            highlightPreferenceValue="true"
+            includeOnPreferencePage="true"
+            label="Dependency Marker"
+            overviewRulerPreferenceKey="net.ossindex.eclipse.marker.overview"
+            overviewRulerPreferenceValue="true"
+            presentationLayer="0"
+            textPreferenceKey="net.ossindex.eclipse.marker.text"
+            textPreferenceValue="true"
+            textStylePreferenceValue="BOX"
+            verticalRulerPreferenceKey="net.ossindex.eclipse.marker.ruler"
+            verticalRulerPreferenceValue="true">
+      </specification>
+   </extension>
+   <extension
+         id="net.ossindex.eclipse.marker.VulnerabilityMarker"
+         name="Vulnerability"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
    </extension>
 
 </plugin>

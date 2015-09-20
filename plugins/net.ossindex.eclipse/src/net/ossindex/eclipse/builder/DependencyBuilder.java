@@ -26,8 +26,19 @@
  */
 package net.ossindex.eclipse.builder;
 
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+
+import net.ossindex.common.resource.VulnerabilityResource;
+import net.ossindex.eclipse.builder.depends.IDependencyEvent;
+import net.ossindex.eclipse.builder.depends.IDependencyListener;
+import net.ossindex.eclipse.builder.depends.IDependencyPlugin;
+import net.ossindex.eclipse.builder.depends.NpmDependencyPlugin;
 import net.ossindex.eclipse.common.builder.CommonBuilder;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
@@ -41,10 +52,26 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * @author Ken Duck
  *
  */
-public class DependencyBuilder extends CommonBuilder implements IResourceVisitor, IResourceDeltaVisitor
+public class DependencyBuilder extends CommonBuilder implements IResourceVisitor, IResourceDeltaVisitor, IDependencyListener
 {
 	public static final String BUILDER_ID = "net.ossindex.eclipse.DependencyBuilder";
 	private static final String MARKER_TYPE = "net.ossindex.eclipse.xmlProblem";
+	private static final String DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.DependencyMarker";
+	private static final String DEPENDENCY_NAME = "net.ossindex.eclipse.marker.name";
+	private static final String DEPENDENCY_VERSION = "net.ossindex.eclipse.marker.version";
+	private static final String VULNERABILITY_MARKER = "net.ossindex.eclipse.marker.VulnerabilityMarker";
+	private List<IDependencyPlugin> plugins = new LinkedList<IDependencyPlugin>();
+
+	/**
+	 * Initialize the builder plugins
+	 */
+	public DependencyBuilder()
+	{
+		// FIXME: Eventually this should likely be configurable
+		NpmDependencyPlugin plugin = new NpmDependencyPlugin();
+		plugin.addListener(this);
+		plugins.add(plugin);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -84,7 +111,96 @@ public class DependencyBuilder extends CommonBuilder implements IResourceVisitor
 	@Override
 	public boolean visit(IResource resource) throws CoreException
 	{
-		System.err.println("VISIT: " + resource);
+		// Clear dependency markers if we are going to build new ones.
+		resource.deleteMarkers(DEPENDENCY_MARKER, true, IResource.DEPTH_ZERO);
+		resource.deleteMarkers(VULNERABILITY_MARKER, true, IResource.DEPTH_ZERO);
+		for (IDependencyPlugin plugin : plugins)
+		{
+			if(plugin.accepts(resource))
+			{
+				plugin.run(resource);
+			}
+		}
+		//System.err.println("VISIT: " + resource);
 		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.ossindex.eclipse.builder.depends.IDependencyListener#dependencyEvent(net.ossindex.eclipse.builder.depends.IDependencyEvent)
+	 */
+	@Override
+	public void dependencyEvent(IDependencyEvent event)
+	{
+		switch(event.getType())
+		{
+		case ADD:
+			handleAddDependency(event);
+			break;
+		case CLEAR:
+			break;
+		default:
+			break;
+		}
+	}
+
+	/** Adding a new dependency
+	 * 
+	 * @param event
+	 */
+	private void handleAddDependency(IDependencyEvent event)
+	{
+		IFile source = event.getSource();
+		int line = event.getSourceLine();
+		int charBegin = event.getOffset();
+		int charEnd = event.getLength();
+		String name = event.getName();
+		String version = event.getVersion();
+		String description = event.getDescription();
+
+		try
+		{
+			IMarker m = source.createMarker(DEPENDENCY_MARKER);
+			m.setAttribute(IMarker.LINE_NUMBER, line);
+			m.setAttribute(IMarker.CHAR_START, charBegin);
+			m.setAttribute(IMarker.CHAR_END, charEnd);
+			m.setAttribute(IMarker.MESSAGE, description);
+			m.setAttribute(DEPENDENCY_NAME, name);
+			m.setAttribute(DEPENDENCY_VERSION, version);
+		}
+		catch(CoreException e)
+		{
+			e.printStackTrace();
+		}
+
+		try
+		{
+			VulnerabilityResource[] vulnerabilities = event.getVulnerabilities();
+			if(vulnerabilities != null)
+			{
+				for (VulnerabilityResource vulnerability : vulnerabilities)
+				{
+					IMarker m = source.createMarker(VULNERABILITY_MARKER);
+					m.setAttribute(IMarker.LINE_NUMBER, line);
+					m.setAttribute(IMarker.MESSAGE, vulnerability.getDescription());
+					m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+					
+					// If it does not affect the installed version it should be stored as info only
+					if(vulnerability.affects(name, version))
+					{
+						m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+					}
+					else
+					{
+						m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
+					}
+				}
+			}
+		}
+		catch (IOException | CoreException e)
+		{
+			e.printStackTrace();
+		}
+
 	}
 }
