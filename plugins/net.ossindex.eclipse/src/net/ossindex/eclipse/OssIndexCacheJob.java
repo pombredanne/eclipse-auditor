@@ -82,19 +82,27 @@ public class OssIndexCacheJob extends Job
 	@Override
 	protected IStatus run(IProgressMonitor monitor)
 	{
+		System.err.println("START JOB");
 		if(buffer != null && !buffer.isEmpty())
 		{
-			IFile[] ifiles = new IFile[buffer.size()];
-			File[] files = new File[buffer.size()];
-			int i = 0;
-
-			// Perform the query in chunks
-			for(IFile ifile: buffer)
+			IFile[] ifiles = null;
+			File[] files = null;
+			synchronized(buffer)
 			{
-				File file = ifile.getLocation().toFile();
-				files[i] = file;
-				ifiles[i] = ifile;
-				i++;
+				ifiles = new IFile[buffer.size()];
+				files = new File[buffer.size()];
+				int i = 0;
+	
+				// Perform the query in chunks
+				for(IFile ifile: buffer)
+				{
+					File file = ifile.getLocation().toFile();
+					files[i] = file;
+					ifiles[i] = ifile;
+					i++;
+				}
+				
+				buffer.clear();
 			}
 
 			try
@@ -130,6 +138,7 @@ public class OssIndexCacheJob extends Job
 				}
 			});
 		}
+		System.err.println("END JOB");
 		return Status.OK_STATUS;
 	}
 

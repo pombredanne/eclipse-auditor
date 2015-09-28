@@ -232,20 +232,22 @@ public class OssIndexResourceManager extends JobChangeAdapter
 			// Make sure this isn't already buffered and in progress
 			if(job != null && !job.contains(ifile))
 			{
-				buffer.add(ifile);
+				synchronized(buffer)
+				{
+					buffer.add(ifile);
+				}
 			}
 		}
-		if(job == null || job.getState() == Job.NONE)
+		if(buffer != null && !buffer.isEmpty() && job == null || job.getState() == Job.NONE)
 		{
 			// (Re) Create the job
+			System.err.println("NEW JOB");
 			job = new OssIndexCacheJob(buffer);
-			// Detach the buffer
-			buffer = new HashSet<IFile>();
 			// Start the job
 			if(PlatformUI.isWorkbenchRunning())
 			{
 				job.addJobChangeListener(this);
-				job.setPriority(Job.DECORATE);
+				job.setPriority(Job.BUILD);
 				job.schedule();
 			}
 		}

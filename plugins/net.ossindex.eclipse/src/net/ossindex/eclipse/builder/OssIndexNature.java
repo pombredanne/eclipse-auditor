@@ -1,5 +1,7 @@
 package net.ossindex.eclipse.builder;
 
+import net.ossindex.eclipse.common.Utils;
+
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -58,6 +60,9 @@ public class OssIndexNature implements IProjectNature {
 				return;
 			}
 		}
+		
+		// Clear build information
+		Utils.getCUtils().clean(new String[] {DependencyBuilder.BUILDER_ID});
 	}
 
 	/*
