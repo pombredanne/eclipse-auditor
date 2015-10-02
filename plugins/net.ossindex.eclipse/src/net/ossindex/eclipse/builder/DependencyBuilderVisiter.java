@@ -21,6 +21,8 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 	private static final String DEPENDENCY_NAME = "net.ossindex.eclipse.marker.name";
 	private static final String DEPENDENCY_VERSION = "net.ossindex.eclipse.marker.version";
 	private static final String DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.DependencyMarker";
+	public static final String DEPENDENCY_URL = "net.ossindex.eclipse.marker.url";
+	public static final String VULNERABILITY_ID = "net.ossindex.eclipse.marker.id";
 	private static final String VULNERABILITY_MARKER = "net.ossindex.eclipse.marker.VulnerabilityMarker";
 
 	private List<IDependencyPlugin> plugins;
@@ -152,6 +154,10 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 					m.setAttribute(IMarker.LINE_NUMBER, line);
 					m.setAttribute(IMarker.MESSAGE, vulnerability.getDescription());
 					m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+					
+					m.setAttribute(DEPENDENCY_URL, vulnerability.getUri().toString());
+					long id = vulnerability.getId();
+					m.setAttribute(VULNERABILITY_ID, Long.toString(id));
 
 					// If it does not affect the installed version it should be stored as info only
 					if(vulnerability.affects(name, version))

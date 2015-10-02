@@ -238,7 +238,7 @@ public class OssIndexResourceManager extends JobChangeAdapter
 				}
 			}
 		}
-		if(buffer != null && !buffer.isEmpty() && job == null || job.getState() == Job.NONE)
+		if((buffer != null && !buffer.isEmpty()) && (job == null || job.getState() == Job.NONE))
 		{
 			// (Re) Create the job
 			System.err.println("NEW JOB");

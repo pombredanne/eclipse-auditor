@@ -36,7 +36,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.ossindex.common.resource.AbstractRemoteResource;
 import net.ossindex.common.resource.ArtifactResource;
 import net.ossindex.common.resource.ScmResource;
 import net.ossindex.common.utils.FilePosition;
@@ -212,7 +211,7 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 	 */
 	private void reportDependencyInformation(IFile file, FilePosition position, PackageDependency[] pkgs) throws IOException
 	{
-		AbstractRemoteResource.setDebug(true);
+//		AbstractRemoteResource.setDebug(true);
 		ArtifactResource[] artifactMatches = ArtifactResource.find(pkgs);
 		Map<String,ArtifactResource> matches = new HashMap<String,ArtifactResource>();
 		for (ArtifactResource artifact : artifactMatches)
