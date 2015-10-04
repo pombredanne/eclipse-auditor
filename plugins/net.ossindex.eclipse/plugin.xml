@@ -185,6 +185,9 @@
       <attribute
             name="net.ossindex.eclipse.marker.id">
       </attribute>
+      <attribute
+            name="net.ossindex.eclipse.marker.summary">
+      </attribute>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
