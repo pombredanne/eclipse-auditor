@@ -214,6 +214,13 @@
             id="net.ossindex.eclipse.views.VulnerabilityView"
             name="Vulnerability">
       </view>
+      <view
+            category="net.ossindex.eclipse"
+            class="net.ossindex.eclipse.views.DependencyView"
+            icon="icons/chart_organisation.png"
+            id="net.ossindex.eclipse.views.DependencyView"
+            name="Dependencies">
+      </view>
    </extension>
 
 </plugin>

@@ -18,9 +18,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDependencyListener
 {
-	private static final String DEPENDENCY_NAME = "net.ossindex.eclipse.marker.name";
-	private static final String DEPENDENCY_VERSION = "net.ossindex.eclipse.marker.version";
-	private static final String DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.DependencyMarker";
+	public static final String DEPENDENCY_NAME = "net.ossindex.eclipse.marker.name";
+	public static final String DEPENDENCY_VERSION = "net.ossindex.eclipse.marker.version";
+	public static final String DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.DependencyMarker";
 	public static final String DEPENDENCY_URL = "net.ossindex.eclipse.marker.url";
 	public static final String VULNERABILITY_ID = "net.ossindex.eclipse.marker.id";
 	private static final String VULNERABILITY_MARKER = "net.ossindex.eclipse.marker.VulnerabilityMarker";
