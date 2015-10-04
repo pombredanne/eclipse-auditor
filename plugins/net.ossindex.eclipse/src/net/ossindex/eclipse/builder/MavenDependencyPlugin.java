@@ -191,7 +191,7 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 			List<PackageDependency> packageDependency = new LinkedList<PackageDependency>();
 			for (Artifact artifact : artifacts)
 			{
-				PackageDependency pkgDep = new PackageDependency("maven", artifact.getArtifactId(), artifact.getVersion());
+				PackageDependency pkgDep = new PackageDependency(position, "maven", artifact.getArtifactId(), artifact.getVersion());
 				packageDependency.add(pkgDep);
 			}
 			reportDependencyInformation(resource, position, packageDependency.toArray(new PackageDependency[packageDependency.size()]));
