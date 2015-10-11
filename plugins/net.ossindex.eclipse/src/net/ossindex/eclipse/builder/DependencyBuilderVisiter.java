@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import net.ossindex.common.resource.VulnerabilityResource;
+import net.ossindex.eclipse.Activator;
 import net.ossindex.eclipse.builder.depends.IDependencyEvent;
 import net.ossindex.eclipse.builder.depends.IDependencyListener;
 import net.ossindex.eclipse.builder.depends.IDependencyPlugin;
@@ -15,6 +16,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.ui.statushandlers.StatusManager;
 
 public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDependencyListener
 {
@@ -25,12 +29,18 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 	public static final String VULNERABILITY_ID = "net.ossindex.eclipse.marker.id";
 	private static final String VULNERABILITY_MARKER = "net.ossindex.eclipse.marker.VulnerabilityMarker";
 	public static final String VULNERABILITY_SUMMARY = "net.ossindex.eclipse.marker.summary";
-	
+
 	private List<IDependencyPlugin> plugins;
 
-	public DependencyBuilderVisiter(List<IDependencyPlugin> plugins)
+	/**
+	 * Progress monitor
+	 */
+	private SubMonitor progress;
+
+	public DependencyBuilderVisiter(List<IDependencyPlugin> plugins, IProgressMonitor monitor)
 	{
 		super(DependencyBuilder.BUILDER_ID);
+		progress = SubMonitor.convert(monitor);
 		this.plugins = plugins;
 		for (IDependencyPlugin plugin : plugins)
 		{
@@ -56,19 +66,34 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 	@Override
 	public boolean visit(IResource resource) throws CoreException
 	{
+		// Handle cancellation
+		if(progress.isCanceled()) return false;
+
 		// Don't run if this file is not considered dirty at this time.
 		if(isDirty((IFile)resource))
 		{
+			// Regardless of the amount of progress reported so far,
+			// use 2% of the space remaining in the monitor to process the next node.
+			progress.setWorkRemaining(10);
 			// Clear dependency markers if we are going to build new ones.
 			resource.deleteMarkers(DEPENDENCY_MARKER, true, IResource.DEPTH_ZERO);
 			resource.deleteMarkers(VULNERABILITY_MARKER, true, IResource.DEPTH_ZERO);
-			for (IDependencyPlugin plugin : plugins)
+			try
 			{
-				if(plugin.accepts(resource))
+				for (IDependencyPlugin plugin : plugins)
 				{
-					plugin.run(resource);
+					if(plugin.accepts(resource))
+					{
+						plugin.run(resource);
+					}
 				}
+				markBuilt((IFile)resource);
 			}
+			catch(Exception e)
+			{
+				StatusManager.getManager().handle(new Status(Status.INFO, Activator.PLUGIN_ID, Status.OK, e.getMessage(), e), StatusManager.SHOW);
+			}
+			progress.worked(1);
 		}
 		//System.err.println("VISIT: " + resource);
 		return true;
@@ -91,9 +116,14 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 		return false;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see net.ossindex.eclipse.common.builder.CommonBuildVisitor#setProgressMonitor(org.eclipse.core.runtime.IProgressMonitor)
+	 */
 	@Override
 	public void setProgressMonitor(IProgressMonitor monitor)
 	{
+		progress = SubMonitor.convert(monitor);
 	}
 
 	/*
@@ -155,7 +185,7 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 					m.setAttribute(IMarker.LINE_NUMBER, line);
 					m.setAttribute(IMarker.MESSAGE, vulnerability.getTitle());
 					m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-					
+
 					m.setAttribute(DEPENDENCY_URL, vulnerability.getUri().toString());
 					long id = vulnerability.getId();
 					m.setAttribute(VULNERABILITY_ID, Long.toString(id));

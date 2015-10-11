@@ -48,9 +48,6 @@ public class DependencyBuilder extends CommonBuilder
 	public static final String BUILDER_ID = "net.ossindex.eclipse.DependencyBuilder";
 	private List<IDependencyPlugin> plugins = new LinkedList<IDependencyPlugin>();
 	
-	private DependencyBuilderVisiter visitor;
-
-	
 	/**
 	 * Initialize the builder plugins
 	 */
@@ -59,8 +56,6 @@ public class DependencyBuilder extends CommonBuilder
 		// FIXME: Eventually this should likely be configurable
 		plugins.add(new NpmDependencyPlugin());
 		plugins.add(new MavenDependencyPlugin());
-		
-		visitor = new DependencyBuilderVisiter(plugins);
 	}
 
 	/*
@@ -70,7 +65,7 @@ public class DependencyBuilder extends CommonBuilder
 	@Override
 	protected IResourceVisitor getBuildVisitor(IProgressMonitor monitor)
 	{
-		return visitor;
+		return new DependencyBuilderVisiter(plugins, monitor);
 	}
 
 	/*
@@ -80,7 +75,7 @@ public class DependencyBuilder extends CommonBuilder
 	@Override
 	protected IResourceDeltaVisitor getDeltaVisitor(IProgressMonitor monitor)
 	{
-		return visitor;
+		return new DependencyBuilderVisiter(plugins, monitor);
 	}
 
 
