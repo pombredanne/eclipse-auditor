@@ -27,13 +27,14 @@
 package net.ossindex.eclipse.views;
 
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import net.ossindex.common.resource.PackageResource;
 import net.ossindex.eclipse.builder.DependencyBuilderVisiter;
+import net.ossindex.eclipse.text.CursorEvent;
+import net.ossindex.eclipse.text.ICursorListener;
+import net.ossindex.eclipse.text.TextEditorCursorListener;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -55,32 +56,20 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CaretEvent;
-import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.custom.StyledTextContent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 
 /** A view for exploring dependencies for a project
@@ -88,7 +77,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * @author Ken Duck
  *
  */
-public class DependencyView extends ViewPart implements CaretListener
+public class DependencyView extends ViewPart implements ICursorListener
 {
 	/**
 	 * The ID of the view as specified by the extension.
@@ -97,12 +86,10 @@ public class DependencyView extends ViewPart implements CaretListener
 
 	private TableViewer dependencyViewer;
 	private TableViewer versionViewer;
-	
+
 	private Action action1;
 	private Action action2;
 	private Action doubleClickAction;
-
-	private Set<IWorkbenchPart> activeEditors = new HashSet<IWorkbenchPart>();
 
 	/**
 	 * Indicate the name of the selected package
@@ -126,23 +113,23 @@ public class DependencyView extends ViewPart implements CaretListener
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(1, true);
 		composite.setLayout(layout);
-		
+
 		selectedPackageLabel = new Label(composite, SWT.NONE);
 		selectedPackageLabel.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT));
 		selectedPackageLabel.setText("<Select package...>");
 		selectedPackageLabel.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 1, 1));
-		
+
 		Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
-	    separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		SashForm form = new SashForm(composite, SWT.HORIZONTAL);
 		form.setLayout(new FillLayout());
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		form.setBackground(form.getDisplay().getSystemColor( SWT.COLOR_GRAY));
-		
+
 		buildDependencyPanel(form);
 		buildVersionPanel(form);
-		
+
 		form.setWeights(new int[] {75, 25});
 
 
@@ -210,31 +197,9 @@ public class DependencyView extends ViewPart implements CaretListener
 		//
 		//		});
 
-		getSite().getWorkbenchWindow().getActivePage().addPartListener(new IPartListener() {
-			@Override
-			public void partActivated(IWorkbenchPart part) {
-				addCaretListener(part);
-			}
+		// Listen for cursor events
+		new TextEditorCursorListener(getSite(), this);
 
-			@Override
-			public void partBroughtToTop(IWorkbenchPart part) {
-				addCaretListener(part);
-			}
-
-			@Override
-			public void partClosed(IWorkbenchPart part) {
-				activeEditors.remove(part);
-			}
-
-			@Override
-			public void partDeactivated(IWorkbenchPart part) {
-			}
-
-			@Override
-			public void partOpened(IWorkbenchPart part) {
-				addCaretListener(part);
-			}
-		});
 		//		makeActions();
 		//		hookContextMenu();
 		//		hookDoubleClickAction();
@@ -247,52 +212,52 @@ public class DependencyView extends ViewPart implements CaretListener
 		composite.setBackground(form.getDisplay().getSystemColor( SWT.COLOR_WHITE));
 		GridLayout layout = new GridLayout(1, true);
 		composite.setLayout(layout);
-		
+
 		Label label = new Label(composite, SWT.NONE);
 		label.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT));
 		label.setText("Available versions");
 		label.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 1, 1));
-		
+
 		Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
-	    separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	    
+		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
 		versionViewer = new TableViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		versionViewer.setContentProvider(new PackageContentProvider());
 		versionViewer.setLabelProvider(new PackageLabelProvider());
 		versionViewer.setComparator(new ArtifactComparator());
 		versionViewer.setInput(getViewSite());
-		
+
 		Table table = versionViewer.getTable();
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 	}
 
 	private void buildDependencyPanel(SashForm form)
 	{
-//		Composite composite = new Composite(form, SWT.NONE);
-//		composite.setBackground(form.getDisplay().getSystemColor( SWT.COLOR_WHITE));
-//		GridLayout layout = new GridLayout(1, true);
-//		composite.setLayout(layout);
-//		
-//		Label label = new Label(composite, SWT.NONE);
-//		label.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT));
-//		label.setText("Package dependencies");
-//		label.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 1, 1));
-//		
-//		Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
-//	    separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	    
+		//		Composite composite = new Composite(form, SWT.NONE);
+		//		composite.setBackground(form.getDisplay().getSystemColor( SWT.COLOR_WHITE));
+		//		GridLayout layout = new GridLayout(1, true);
+		//		composite.setLayout(layout);
+		//		
+		//		Label label = new Label(composite, SWT.NONE);
+		//		label.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT));
+		//		label.setText("Package dependencies");
+		//		label.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 1, 1));
+		//		
+		//		Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
+		//	    separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
 		dependencyViewer = new TableViewer(form, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		dependencyViewer.setContentProvider(new ArtifactContentProvider());
-//		dependencyViewer.setLabelProvider(new ArtifactLabelProvider());
-//		dependencyViewer.setSorter(new NameSorter());
+		//		dependencyViewer.setLabelProvider(new ArtifactLabelProvider());
+		//		dependencyViewer.setSorter(new NameSorter());
 		dependencyViewer.setInput(getViewSite());
-		
-//		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+
+		//		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
 		Table table = dependencyViewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-//		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		
+		//		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+
 		createTableViewerColumn(dependencyViewer, "Package dependencies", 200, 0, true);
 		createTableViewerColumn(dependencyViewer, "Version", null, 1, true);
 		createTableViewerColumn(dependencyViewer, "Description", 400, 1, true);
@@ -315,46 +280,6 @@ public class DependencyView extends ViewPart implements CaretListener
 		return viewerColumn;
 	}
 
-	/**
-	 * 
-	 * @param part
-	 */
-	protected void addCaretListener(IWorkbenchPart part)
-	{
-		if(!activeEditors.contains(part))
-		{
-			ITextEditor text = null;
-
-			if(part instanceof FormEditor) {
-				//	        //Check if this is an editor and its input is what I need
-				//	        AbstractTextEditor e =
-				//	            (AbstractTextEditor)((IEditorReference) partRef).getEditor(false);
-				//	        //((StyledText)e.getAdapter(Control.class)).addCaretListener(l);
-				IEditorPart apart = ((FormEditor)part).getActiveEditor();
-				if(apart instanceof ITextEditor)
-				{
-					text = (ITextEditor)apart;
-				}
-			}
-
-			else if(part instanceof ITextEditor)
-			{
-				text = (ITextEditor)part;
-			}
-
-			if(text != null)
-			{
-				System.err.println("WHOO");
-				Control control = (Control) (text.getAdapter(Control.class));
-				if(control instanceof StyledText)
-				{
-					StyledText styledText = (StyledText)control;
-					styledText.addCaretListener(this);
-					activeEditors.add(part);
-				}
-			}
-		}
-	}
 
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
@@ -465,92 +390,47 @@ public class DependencyView extends ViewPart implements CaretListener
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.swt.custom.CaretListener#caretMoved(org.eclipse.swt.custom.CaretEvent)
+	 * @see net.ossindex.eclipse.views.ICursorListener#cursorEvent(net.ossindex.eclipse.views.CursorEvent)
 	 */
 	@Override
-	public void caretMoved(CaretEvent event)
+	public void cursorEvent(CursorEvent event)
 	{
-		System.err.println("CARET: " + event.getSource());
+		IFile file = event.getFile();
+		int line = event.getLine();
 
-		StyledText stext = (StyledText)event.getSource();
-		if(stext != null)
+		// We have a file and a line number now. Find the dependencies...
+		List<Dependency> deps = new LinkedList<Dependency>();
+		try
 		{
-			int offset = stext.getCaretOffset();
-			System.err.println("  OFFSET: " + offset);
-			StyledTextContent content = stext.getContent();
-
-			// +1 because file lines start at 1
-			int line = content.getLineAtOffset(offset) + 1;
-			System.err.println("  LINE: " + line);
-
-
-
-			// Now find the file
-			IEditorPart editorPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
-
-			ITextEditor textEditor = null;
-
-			if(editorPart instanceof FormEditor)
+			IMarker[] markers = file.findMarkers(DependencyBuilderVisiter.DEPENDENCY_MARKER, true, IResource.DEPTH_INFINITE);
+			for (IMarker marker : markers)
 			{
-				FormEditor editor = (FormEditor)editorPart;
-				if(editor.getActiveEditor() instanceof ITextEditor)
+				Integer myLine = (Integer) marker.getAttribute(IMarker.LINE_NUMBER);
+				if(myLine != null && (myLine == line))
 				{
-					textEditor = (ITextEditor) editor.getActiveEditor();
-				}
-				System.err.println("WUT: " + editor.getActiveEditor().getClass().getSimpleName());
-			}
-			if(editorPart instanceof ITextEditor)
-			{
-				ITextEditor editor = (ITextEditor)editorPart;
-				textEditor = (ITextEditor) editor;
-				//					    IDocumentProvider provider = editor.getDocumentProvider();
-				//					    IDocument document = provider.getDocument(input);
-			}
-
-			IFile file = null;
-			if(textEditor != null)
-			{
-				IEditorInput input = textEditor.getEditorInput();
-				file = ((IFileEditorInput)input).getFile();
-			}
-
-
-			// We have a file and a line number now. Find the dependencies...
-			List<Dependency> deps = new LinkedList<Dependency>();
-			if(file != null)
-			{
-				try
-				{
-					IMarker[] markers = file.findMarkers(DependencyBuilderVisiter.DEPENDENCY_MARKER, true, IResource.DEPTH_INFINITE);
-					for (IMarker marker : markers)
+					Dependency dep = getDep(marker);
+					if(dep != null)
 					{
-						Integer myLine = (Integer) marker.getAttribute(IMarker.LINE_NUMBER);
-						if(myLine != null && (myLine == line))
-						{
-							Dependency dep = getDep(marker);
-							if(dep != null)
-							{
-								deps.add(dep);
-							}
-						}
+						deps.add(dep);
 					}
 				}
-				catch (CoreException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			
-			if(!deps.isEmpty()) {
-				// The top dependency is the selected dependency (?)
-				Dependency dep = deps.get(0);
-				selectedPackageLabel.setText(dep.getName() + " " + dep.getVersion());
-				dependencyViewer.setInput(deps);
-				
-				PackageResource pkg = dep.getPackage();
-				versionViewer.setInput(pkg);
 			}
 		}
+		catch (CoreException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		if(!deps.isEmpty()) {
+			// The top dependency is the selected dependency (?)
+			Dependency dep = deps.get(0);
+			selectedPackageLabel.setText(dep.getName() + " " + dep.getVersion());
+			dependencyViewer.setInput(deps);
+
+			PackageResource pkg = dep.getPackage();
+			versionViewer.setInput(pkg);
+		}
 	}
+
 }
