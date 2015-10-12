@@ -24,71 +24,37 @@
  *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.ossindex.eclipse.builder.depends;
+package net.ossindex.eclipse.views;
 
-import java.util.LinkedList;
-import java.util.List;
+import net.ossindex.eclipse.builder.DependencyBuilderVisiter;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
 
-/** Abstract class that provides common functionality for plugins that identify
- * dependencies. These could be plugins that scan package files, import/require
- * statements in source files, etc.
+/** Simple class representing a dependency.
  * 
  * @author Ken Duck
  *
  */
-public abstract class AbstractDependencyPlugin implements IDependencyPlugin
+public class Dependency
 {
 
-	/**
-	 * Event listeners
-	 */
-	private List<IDependencyListener> listeners = new LinkedList<IDependencyListener>();
+	private String name;
+	private String version;
 
-	/*
-	 * (non-Javadoc)
-	 * @see net.ossindex.eclipse.builder.depends.IDependencyPlugin#accepts(org.eclipse.core.resources.IResource)
-	 */
-	@Override
-	public abstract boolean accepts(IResource resource);
-
-	/*
-	 * (non-Javadoc)
-	 * @see net.ossindex.eclipse.builder.depends.IDependencyPlugin#run(org.eclipse.core.resources.IResource)
-	 */
-	@Override
-	public abstract void run(IResource resource);
-
-	/*
-	 * (non-Javadoc)
-	 * @see net.ossindex.eclipse.builder.depends.IDependencyPlugin#addListener(net.ossindex.eclipse.builder.depends.IDependencyListener)
-	 */
-	@Override
-	public void addListener(IDependencyListener listener)
+	public Dependency(IMarker marker) throws CoreException
 	{
-		listeners.add(listener);
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see net.ossindex.eclipse.builder.depends.IDependencyPlugin#removeListener(net.ossindex.eclipse.builder.depends.IDependencyListener)
-	 */
-	@Override
-	public void removeListener(IDependencyListener listener)
-	{
-		listeners.remove(listener);
+		name = (String)marker.getAttribute(DependencyBuilderVisiter.DEPENDENCY_NAME);
+		version = (String)marker.getAttribute(DependencyBuilderVisiter.DEPENDENCY_VERSION);
 	}
 
-	/** Tell all listeners of a new dependency event
-	 * 
-	 * @param event
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
 	 */
-	public void fireDependencyEvent(IDependencyEvent event)
+	@Override
+	public String toString()
 	{
-		for (IDependencyListener listener : listeners)
-		{
-			listener.dependencyEvent(event);
-		}
+		return name + " " + version;
 	}
 }

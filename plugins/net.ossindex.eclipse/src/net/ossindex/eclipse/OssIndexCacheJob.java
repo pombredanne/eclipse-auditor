@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.util.Set;
 
+import net.ossindex.common.ResourceFactory;
 import net.ossindex.common.resource.FileResource;
 import net.ossindex.eclipse.decorators.OssIndexDecorator;
 
@@ -107,7 +108,7 @@ public class OssIndexCacheJob extends Job
 
 			try
 			{
-				FileResource[] resources = FileResource.find(files);
+				FileResource[] resources = ResourceFactory.getResourceFactory().findFileResources(files);
 				if(resources != null)
 				{
 					for (int j = 0; j < resources.length; j++)

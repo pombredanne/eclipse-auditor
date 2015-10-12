@@ -32,6 +32,7 @@ import java.net.ConnectException;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.ossindex.common.ResourceFactory;
 import net.ossindex.common.resource.FileResource;
 
 import org.eclipse.core.resources.IFile;
@@ -123,7 +124,7 @@ public class OssIndexResourceManager extends JobChangeAdapter
 				File file = ifile.getLocation().toFile();
 				try
 				{
-					fresource = FileResource.find(file);
+					fresource = ResourceFactory.getResourceFactory().findFileResource(file);
 					return fresource;
 				}
 				catch (ConnectException e)

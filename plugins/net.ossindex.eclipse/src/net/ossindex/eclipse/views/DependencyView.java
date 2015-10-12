@@ -28,6 +28,8 @@ package net.ossindex.eclipse.views;
 
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import net.ossindex.eclipse.builder.DependencyBuilderVisiter;
@@ -43,7 +45,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -54,6 +55,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.StyledTextContent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
@@ -62,7 +64,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener;
-import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
@@ -111,68 +112,68 @@ public class DependencyView extends ViewPart implements CaretListener
 		viewer.setSorter(new NameSorter());
 		viewer.setInput(getViewSite());
 
-		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(new ISelectionListener()
-		{
-
-			/*
-			 * (non-Javadoc)
-			 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
-			 */
-			@Override
-			public void selectionChanged(IWorkbenchPart part, ISelection selection)
-			{
-				System.err.println("WAT: " + selection.getClass().getCanonicalName());
-
-				if(selection instanceof ITextSelection)
-				{
-					ITextSelection textSel = (ITextSelection) selection;
-					int begin = textSel.getStartLine() + 1; // +1 to match with markers
-					int end = textSel.getEndLine() + 1; // +1 to match with markers
-					IEditorPart editorPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
-
-					IEditorInput input = null;
-
-					if(editorPart instanceof FormEditor)
-					{
-						FormEditor editor = (FormEditor)editorPart;
-						input = editor.getEditorInput();
-					}
-					if(editorPart instanceof ITextEditor)
-					{
-						ITextEditor editor = (ITextEditor)part;
-						input = editor.getEditorInput();
-						//					    IDocumentProvider provider = editor.getDocumentProvider();
-						//					    IDocument document = provider.getDocument(input);
-					}
-
-					if(input != null)
-					{
-						if(input instanceof IFileEditorInput)
-						{
-							IFile file = ((IFileEditorInput)input).getFile();
-							try
-							{
-								IMarker[] markers = file.findMarkers(DependencyBuilderVisiter.DEPENDENCY_MARKER, true, IResource.DEPTH_INFINITE);
-								for (IMarker marker : markers)
-								{
-									Integer myLine = (Integer) marker.getAttribute(IMarker.LINE_NUMBER);
-									if(myLine != null && (myLine >= begin && myLine <= end))
-									{
-										showDeps(marker);
-									}
-								}
-							}
-							catch (CoreException e)
-							{
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-					}
-				}
-			}
-
-		});
+		//		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(new ISelectionListener()
+		//		{
+		//
+		//			/*
+		//			 * (non-Javadoc)
+		//			 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
+		//			 */
+		//			@Override
+		//			public void selectionChanged(IWorkbenchPart part, ISelection selection)
+		//			{
+		//				System.err.println("WAT: " + selection.getClass().getCanonicalName());
+		//
+		//				if(selection instanceof ITextSelection)
+		//				{
+		//					ITextSelection textSel = (ITextSelection) selection;
+		//					int begin = textSel.getStartLine() + 1; // +1 to match with markers
+		//					int end = textSel.getEndLine() + 1; // +1 to match with markers
+		//					IEditorPart editorPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+		//
+		//					IEditorInput input = null;
+		//
+		//					if(editorPart instanceof FormEditor)
+		//					{
+		//						FormEditor editor = (FormEditor)editorPart;
+		//						input = editor.getEditorInput();
+		//					}
+		//					if(editorPart instanceof ITextEditor)
+		//					{
+		//						ITextEditor editor = (ITextEditor)part;
+		//						input = editor.getEditorInput();
+		//						//					    IDocumentProvider provider = editor.getDocumentProvider();
+		//						//					    IDocument document = provider.getDocument(input);
+		//					}
+		//
+		//					if(input != null)
+		//					{
+		//						if(input instanceof IFileEditorInput)
+		//						{
+		//							IFile file = ((IFileEditorInput)input).getFile();
+		//							try
+		//							{
+		//								IMarker[] markers = file.findMarkers(DependencyBuilderVisiter.DEPENDENCY_MARKER, true, IResource.DEPTH_INFINITE);
+		//								for (IMarker marker : markers)
+		//								{
+		//									Integer myLine = (Integer) marker.getAttribute(IMarker.LINE_NUMBER);
+		//									if(myLine != null && (myLine >= begin && myLine <= end))
+		//									{
+		//										showDeps(marker);
+		//									}
+		//								}
+		//							}
+		//							catch (CoreException e)
+		//							{
+		//								// TODO Auto-generated catch block
+		//								e.printStackTrace();
+		//							}
+		//						}
+		//					}
+		//				}
+		//			}
+		//
+		//		});
 
 		getSite().getWorkbenchWindow().getActivePage().addPartListener(new IPartListener() {
 			@Override
@@ -214,7 +215,7 @@ public class DependencyView extends ViewPart implements CaretListener
 		if(!activeEditors.contains(part))
 		{
 			ITextEditor text = null;
-			
+
 			if(part instanceof FormEditor) {
 				//	        //Check if this is an editor and its input is what I need
 				//	        AbstractTextEditor e =
@@ -226,12 +227,12 @@ public class DependencyView extends ViewPart implements CaretListener
 					text = (ITextEditor)apart;
 				}
 			}
-			
+
 			else if(part instanceof ITextEditor)
 			{
 				text = (ITextEditor)part;
 			}
-			
+
 			if(text != null)
 			{
 				System.err.println("WHOO");
@@ -337,20 +338,20 @@ public class DependencyView extends ViewPart implements CaretListener
 	 * 
 	 * @param marker
 	 */
-	private void showDeps(IMarker marker)
+	private Dependency getDep(IMarker marker)
 	{
 		try
 		{
-			System.err.println("DEP: [" + marker.getType() + "] " +
-					marker.getResource().getName() + " " +
-					marker.getAttribute(IMarker.LINE_NUMBER) + " " +
-					marker.getAttribute(DependencyBuilderVisiter.DEPENDENCY_VERSION) + " " +
-					marker.getAttribute(DependencyBuilderVisiter.DEPENDENCY_NAME));
+			if(DependencyBuilderVisiter.DEPENDENCY_MARKER.equals(marker.getType()))
+			{
+				return new Dependency(marker);
+			}
 		}
 		catch (CoreException e)
 		{
 			e.printStackTrace();
 		}
+		return null;
 	}
 
 	/*
@@ -360,6 +361,79 @@ public class DependencyView extends ViewPart implements CaretListener
 	@Override
 	public void caretMoved(CaretEvent event)
 	{
-		System.err.println("CARET: " + event);
+		System.err.println("CARET: " + event.getSource());
+
+		StyledText stext = (StyledText)event.getSource();
+		if(stext != null)
+		{
+			int offset = stext.getCaretOffset();
+			System.err.println("  OFFSET: " + offset);
+			StyledTextContent content = stext.getContent();
+
+			// +1 because file lines start at 1
+			int line = content.getLineAtOffset(offset) + 1;
+			System.err.println("  LINE: " + line);
+
+
+
+			// Now find the file
+			IEditorPart editorPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+
+			ITextEditor textEditor = null;
+
+			if(editorPart instanceof FormEditor)
+			{
+				FormEditor editor = (FormEditor)editorPart;
+				if(editor.getActiveEditor() instanceof ITextEditor)
+				{
+					textEditor = (ITextEditor) editor.getActiveEditor();
+				}
+				System.err.println("WUT: " + editor.getActiveEditor().getClass().getSimpleName());
+			}
+			if(editorPart instanceof ITextEditor)
+			{
+				ITextEditor editor = (ITextEditor)editorPart;
+				textEditor = (ITextEditor) editor;
+				//					    IDocumentProvider provider = editor.getDocumentProvider();
+				//					    IDocument document = provider.getDocument(input);
+			}
+
+			IFile file = null;
+			if(textEditor != null)
+			{
+				IEditorInput input = textEditor.getEditorInput();
+				file = ((IFileEditorInput)input).getFile();
+			}
+
+
+			// We have a file and a line number now. Find the dependencies...
+			List<Dependency> deps = new LinkedList<Dependency>();
+			if(file != null)
+			{
+				try
+				{
+					IMarker[] markers = file.findMarkers(DependencyBuilderVisiter.DEPENDENCY_MARKER, true, IResource.DEPTH_INFINITE);
+					for (IMarker marker : markers)
+					{
+						Integer myLine = (Integer) marker.getAttribute(IMarker.LINE_NUMBER);
+						if(myLine != null && (myLine == line))
+						{
+							Dependency dep = getDep(marker);
+							if(dep != null)
+							{
+								deps.add(dep);
+							}
+						}
+					}
+				}
+				catch (CoreException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			if(!deps.isEmpty()) viewer.setInput(deps);
+		}
 	}
 }

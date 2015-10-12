@@ -26,6 +26,9 @@
  */
 package net.ossindex.eclipse.views;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -36,17 +39,51 @@ import org.eclipse.jface.viewers.Viewer;
  */
 public class DependencyContentProvider implements IStructuredContentProvider
 {
+	private List<Dependency> deps = new LinkedList<Dependency>();
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+	 */
 	@Override
-	public void inputChanged(Viewer v, Object oldInput, Object newInput) {
+	public void inputChanged(Viewer v, Object oldInput, Object newInput)
+	{
+		if(newInput instanceof List<?>)
+		{
+			List<Dependency> newDeps = new LinkedList<Dependency>();
+			System.err.println("INPUT: " + newInput);
+			@SuppressWarnings("unchecked")
+			List<Object> list = (List<Object>)newInput;
+			for (Object object : list)
+			{
+				if(object instanceof Dependency)
+				{
+					newDeps.add((Dependency)object);
+				}
+			}
+			if(!newDeps.isEmpty())
+			{
+				deps = newDeps;
+			}
+		}
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
+	 */
 	@Override
-	public void dispose() {
+	public void dispose()
+	{
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
+	 */
 	@Override
 	public Object[] getElements(Object parent)
 	{
-		return new String[] { "One", "Two", "Three" };
+		return deps.toArray(new Dependency[deps.size()]);
 	}
 }

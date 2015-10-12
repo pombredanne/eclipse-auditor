@@ -28,7 +28,6 @@ package net.ossindex.eclipse.builder.depends;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -37,6 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.ossindex.common.ResourceFactory;
 import net.ossindex.common.resource.ArtifactResource;
 import net.ossindex.common.resource.ScmResource;
 import net.ossindex.common.utils.FilePosition;
@@ -226,7 +226,7 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 	{
 		// Find matching artifacts for the packages
 		PackageDependency[] pkgs = packageDependencies.toArray(new PackageDependency[packageDependencies.size()]);
-		ArtifactResource[] artifactMatches = ArtifactResource.find(pkgs);
+		ArtifactResource[] artifactMatches = ResourceFactory.getResourceFactory().findArtifactResources(pkgs);
 
 		Map<String,ArtifactResource> matches = new HashMap<String,ArtifactResource>();
 		for (ArtifactResource artifact : artifactMatches)
@@ -265,7 +265,7 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 		}
 
 		Long[] tmp = scmIds.toArray(new Long[scmIds.size()]);
-		ScmResource[] scmResources = ScmResource.find(ArrayUtils.toPrimitive(tmp));
+		ScmResource[] scmResources = ResourceFactory.getResourceFactory().findScmResources(ArrayUtils.toPrimitive(tmp));
 		// This should never happen
 		if(scmResources == null) return;
 

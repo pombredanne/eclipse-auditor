@@ -27,7 +27,7 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 	public static final String DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.DependencyMarker";
 	public static final String DEPENDENCY_URL = "net.ossindex.eclipse.marker.url";
 	public static final String VULNERABILITY_ID = "net.ossindex.eclipse.marker.id";
-	private static final String VULNERABILITY_MARKER = "net.ossindex.eclipse.marker.VulnerabilityMarker";
+	public static final String VULNERABILITY_MARKER = "net.ossindex.eclipse.marker.VulnerabilityMarker";
 	public static final String VULNERABILITY_SUMMARY = "net.ossindex.eclipse.marker.summary";
 
 	private List<IDependencyPlugin> plugins;
@@ -158,6 +158,8 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 		String name = event.getName();
 		String version = event.getVersion();
 		String description = event.getDescription();
+		
+		System.err.println("ADD DEPENDENCY: " + source + ": " + line);
 
 		try
 		{

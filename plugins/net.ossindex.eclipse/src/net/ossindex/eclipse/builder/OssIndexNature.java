@@ -9,6 +9,7 @@ import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
 public class OssIndexNature implements IProjectNature {
@@ -85,6 +86,8 @@ public class OssIndexNature implements IProjectNature {
 		
 		// Clear build information
 		Utils.getCUtils().clean(new String[] {DependencyBuilder.BUILDER_ID});
+		project.deleteMarkers(DependencyBuilderVisiter.DEPENDENCY_MARKER, true, IResource.DEPTH_INFINITE);
+		project.deleteMarkers(DependencyBuilderVisiter.VULNERABILITY_MARKER, true, IResource.DEPTH_INFINITE);
 	}
 
 	/*

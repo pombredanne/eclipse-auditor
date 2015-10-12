@@ -24,72 +24,64 @@
  *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.ossindex.eclipse.builder;
+package net.ossindex.eclipse.utils;
 
-import java.util.LinkedList;
-import java.util.List;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.osgi.service.prefs.BackingStoreException;
 
-import net.ossindex.eclipse.builder.depends.IDependencyPlugin;
-import net.ossindex.eclipse.builder.depends.NpmDependencyPlugin;
-import net.ossindex.eclipse.common.builder.CommonBuilder;
+import net.ossindex.common.IOssIndexCache;
 
-import org.eclipse.core.resources.IResourceDeltaVisitor;
-import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-/** Identify files with known dependencies. Using this information attempt to find
- * vulnerability information.
+/** Implementation of IOssIndexCache that uses Eclipse store for cached
+ * data.
  * 
  * @author Ken Duck
  *
  */
-public class DependencyBuilder extends CommonBuilder
+public class EclipseOssIndexCache implements IOssIndexCache
 {
-	public static final String BUILDER_ID = "net.ossindex.eclipse.DependencyBuilder";
-	private List<IDependencyPlugin> plugins = new LinkedList<IDependencyPlugin>();
-	
-	private DependencyBuilderVisiter visitor;
-	
-	/**
-	 * Initialize the builder plugins
-	 */
-	public DependencyBuilder()
+
+	private IEclipsePreferences prefs;
+
+	public EclipseOssIndexCache(IEclipsePreferences prefs)
 	{
-		// FIXME: Eventually this should likely be configurable
-		plugins.add(new NpmDependencyPlugin());
-		plugins.add(new MavenDependencyPlugin());
-		
-		visitor = new DependencyBuilderVisiter(plugins, null);
+		this.prefs = prefs;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see net.ossindex.eclipse.common.builder.CommonBuilder#getBuildVisitor(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see net.ossindex.common.IOssIndexCache#cache(java.lang.String, java.lang.String)
 	 */
 	@Override
-	protected IResourceVisitor getBuildVisitor(IProgressMonitor monitor)
+	public void cache(String requestString, String json)
 	{
-		return visitor;
+		prefs.put(requestString, json);
+		try
+		{
+			prefs.flush();
+		}
+		catch (BackingStoreException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see net.ossindex.eclipse.common.builder.CommonBuilder#getDeltaVisitor(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see net.ossindex.common.IOssIndexCache#get(java.lang.String)
 	 */
 	@Override
-	protected IResourceDeltaVisitor getDeltaVisitor(IProgressMonitor monitor)
+	public String get(String requestString)
 	{
-		return visitor;
+		return prefs.get(requestString, null);
 	}
-
 
 	/*
 	 * (non-Javadoc)
-	 * @see net.ossindex.eclipse.common.builder.CommonBuilder#getName()
+	 * @see net.ossindex.common.IOssIndexCache#close()
 	 */
 	@Override
-	protected String getName()
+	public void close()
 	{
-		return "Dependency builder";
 	}
+
 }
