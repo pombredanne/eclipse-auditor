@@ -24,64 +24,51 @@
  *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.ossindex.eclipse.utils;
+package net.ossindex.eclipse.views;
 
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.osgi.service.prefs.BackingStoreException;
+import net.ossindex.common.resource.ArtifactResource;
 
-import net.ossindex.common.IOssIndexCache;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 
-/** Implementation of IOssIndexCache that uses Eclipse store for cached
- * data.
+/** Sort by comparing artifacts
  * 
  * @author Ken Duck
  *
  */
-public class EclipseOssIndexCache implements IOssIndexCache
+public class ArtifactComparator extends ViewerComparator
 {
-
-	private IEclipsePreferences prefs;
-
-	public EclipseOssIndexCache(IEclipsePreferences prefs)
-	{
-		this.prefs = prefs;
-	}
+	/**
+	 * Sort direction
+	 */
+	private boolean ascending = false;
 
 	/*
 	 * (non-Javadoc)
-	 * @see net.ossindex.common.IOssIndexCache#cache(java.lang.String, java.lang.String)
+	 * @see org.eclipse.jface.viewers.ViewerComparator#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public void cache(String requestString, String json)
+	public int compare(Viewer viewer, Object o1, Object o2)
 	{
-		prefs.put(requestString, json);
-		try
+		ArtifactResource a1 = (ArtifactResource)o1;
+		ArtifactResource a2 = (ArtifactResource)o2;
+		if(ascending)
 		{
-			prefs.flush();
+			return a1.getVersion().compareTo(a2.getVersion());
 		}
-		catch (BackingStoreException e)
+		else
 		{
-			e.printStackTrace();
+			// Compare in descending order
+			return a2.getVersion().compareTo(a1.getVersion());
 		}
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see net.ossindex.common.IOssIndexCache#get(java.lang.String)
+	
+	/** Set the sort direction
+	 * 
+	 * @param b
 	 */
-	@Override
-	public String get(String requestString)
+	public void setSortAscending(boolean b)
 	{
-		return prefs.get(requestString, null);
+		ascending = b;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see net.ossindex.common.IOssIndexCache#close()
-	 */
-	@Override
-	public void close()
-	{
-	}
-
 }

@@ -259,7 +259,7 @@ public class DependencyView extends ViewPart implements CaretListener
 		versionViewer = new TableViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		versionViewer.setContentProvider(new PackageContentProvider());
 		versionViewer.setLabelProvider(new PackageLabelProvider());
-		versionViewer.setSorter(new NameSorter());
+		versionViewer.setComparator(new ArtifactComparator());
 		versionViewer.setInput(getViewSite());
 		
 		Table table = versionViewer.getTable();
@@ -284,7 +284,7 @@ public class DependencyView extends ViewPart implements CaretListener
 		dependencyViewer = new TableViewer(form, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		dependencyViewer.setContentProvider(new ArtifactContentProvider());
 //		dependencyViewer.setLabelProvider(new ArtifactLabelProvider());
-		dependencyViewer.setSorter(new NameSorter());
+//		dependencyViewer.setSorter(new NameSorter());
 		dependencyViewer.setInput(getViewSite());
 		
 //		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);

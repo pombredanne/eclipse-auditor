@@ -1,10 +1,9 @@
 package net.ossindex.eclipse;
 
 import net.ossindex.common.ResourceFactory;
-import net.ossindex.eclipse.utils.EclipseOssIndexCache;
+import net.ossindex.common.cache.MapDbCache;
 
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -35,8 +34,8 @@ public class Activator extends AbstractUIPlugin {
 		plugin = this;
 		
 		// Setup the OSS Index ResourceFactory cache
-		IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(Activator.PLUGIN_ID);
-		ResourceFactory.getResourceFactory().setCache(new EclipseOssIndexCache(prefs));
+		IPath stateLocation = getDefault().getStateLocation();
+		ResourceFactory.getResourceFactory().setCache(new MapDbCache(stateLocation.toFile()));
 	}
 
 	/*

@@ -26,7 +26,7 @@
  */
 package net.ossindex.eclipse.views;
 
-import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.ossindex.common.resource.ArtifactResource;
@@ -78,7 +78,7 @@ public class PackageContentProvider implements IStructuredContentProvider
 	@Override
 	public Object[] getElements(Object parent)
 	{
-		Map<IVersion,ArtifactResource> results = new TreeMap<IVersion, ArtifactResource>();
+		SortedMap<IVersion,ArtifactResource> results = new TreeMap<IVersion, ArtifactResource>();
 		if(pkg != null)
 		{
 			ArtifactResource[] artifacts = pkg.getArtifacts();
