@@ -46,11 +46,15 @@ public class ArtifactCellLabelProvider extends CellLabelProvider {
 	public void update(ViewerCell cell)
 	{
 		final Object entry = (Object) cell.getElement();
-		final StyledString styledString = new StyledString(getColumnText(entry, cell.getColumnIndex()));
+		String text = getColumnText(entry, cell.getColumnIndex());
+		if(text != null)
+		{
+			final StyledString styledString = new StyledString(text);
 
-		cell.setText(styledString.toString());
-		cell.setStyleRanges(styledString.getStyleRanges());
-		cell.setImage(getImage(entry, cell.getColumnIndex()));
+			cell.setText(styledString.toString());
+			cell.setStyleRanges(styledString.getStyleRanges());
+			cell.setImage(getImage(entry, cell.getColumnIndex()));
+		}
 	}
 
 	private String getColumnText(Object entry, int index) {
@@ -60,7 +64,14 @@ public class ArtifactCellLabelProvider extends CellLabelProvider {
 			switch(index)
 			{
 			case 0:
-				return dep.getName();
+				if(dep.getOptional())
+				{
+					return "[optional] " + dep.getName();
+				}
+				else
+				{
+					return dep.getName();
+				}
 			case 1:
 				return dep.getVersion();
 			case 2:

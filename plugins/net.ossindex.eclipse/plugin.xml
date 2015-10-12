@@ -146,6 +146,9 @@
       <attribute
             name="net.ossindex.eclipse.marker.scmId">
       </attribute>
+      <attribute
+            name="net.ossindex.eclipse.marker.optional">
+      </attribute>
    </extension>
    <extension
          point="org.eclipse.ui.editors.annotationTypes">

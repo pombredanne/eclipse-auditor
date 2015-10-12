@@ -26,6 +26,7 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 {
 	public static final String DEPENDENCY_NAME = "net.ossindex.eclipse.marker.name";
 	public static final String DEPENDENCY_VERSION = "net.ossindex.eclipse.marker.version";
+	public static final String DEPENDENCY_OPTIONAL = "net.ossindex.eclipse.marker.optional";
 	public static final String DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.DependencyMarker";
 	public static final String DEPENDENCY_URL = "net.ossindex.eclipse.marker.url";
 	public static final String DEPENDENCY_ARTIFACT = "net.ossindex.eclipse.marker.artifactId";
@@ -177,6 +178,7 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 			m.setAttribute(IMarker.MESSAGE, description);
 			m.setAttribute(DEPENDENCY_NAME, name);
 			m.setAttribute(DEPENDENCY_VERSION, version);
+			m.setAttribute(DEPENDENCY_OPTIONAL, event.getOptional());
 			if(scm != null)
 			{
 				m.setAttribute(DEPENDENCY_SCM, Long.toString(scm.getId()));

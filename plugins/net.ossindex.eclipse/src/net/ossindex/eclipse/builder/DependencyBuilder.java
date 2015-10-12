@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.ossindex.eclipse.builder.depends.IDependencyPlugin;
+import net.ossindex.eclipse.builder.depends.MavenDependencyPlugin;
 import net.ossindex.eclipse.builder.depends.NpmDependencyPlugin;
 import net.ossindex.eclipse.common.builder.CommonBuilder;
 

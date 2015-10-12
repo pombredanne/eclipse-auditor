@@ -184,4 +184,15 @@ public class DependencyEvent implements IDependencyEvent
 		if(pkg != null) return pkg.getScm();
 		return null;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.ossindex.eclipse.builder.depends.IDependencyEvent#getOptional()
+	 */
+	@Override
+	public boolean getOptional()
+	{
+		if(pkg != null) return pkg.getOptional();
+		return false;
+	}
 }

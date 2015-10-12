@@ -24,7 +24,7 @@
  *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.ossindex.eclipse.builder;
+package net.ossindex.eclipse.builder.depends;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,8 +42,6 @@ import net.ossindex.common.resource.ScmResource;
 import net.ossindex.common.utils.FilePosition;
 import net.ossindex.common.utils.LineIndexer;
 import net.ossindex.common.utils.PackageDependency;
-import net.ossindex.eclipse.builder.depends.AbstractDependencyPlugin;
-import net.ossindex.eclipse.builder.depends.DependencyEvent;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -86,7 +84,7 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 	private RepositorySystem repoSystem;
 	private RepositorySystemSession session;
 	private RemoteRepository central;
-	
+
 	public MavenDependencyPlugin()
 	{
 		repoSystem = newRepositorySystem();
@@ -113,8 +111,8 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 	public void run(IResource resource)
 	{
 		System.err.println("WAT: " + resource);
-		
-		
+
+
 		InputStream is = null;
 		try
 		{
@@ -123,7 +121,7 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 			IOUtils.copy(is, writer, "UTF-8");
 			String pom = writer.toString();
 			LineIndexer indexer = new LineIndexer(pom);
-			
+
 			Reader reader = new StringReader(pom);
 			MavenXpp3Reader xpp3Reader = new MavenXpp3Reader();
 			Model model = xpp3Reader.read(reader);
@@ -188,11 +186,13 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 			PreorderNodeListGenerator nlg = new PreorderNodeListGenerator();
 			node.accept( nlg );
 			
-			List<Artifact> artifacts = nlg.getArtifacts(false);
+			List<Dependency> deps = nlg.getDependencies(false);
 			List<PackageDependency> packageDependency = new LinkedList<PackageDependency>();
-			for (Artifact artifact : artifacts)
+			for (Dependency dep : deps)
 			{
+				Artifact artifact = dep.getArtifact();
 				PackageDependency pkgDep = new PackageDependency(position, "maven", artifact.getArtifactId(), artifact.getVersion());
+				pkgDep.setOptional(dep.getOptional());
 				packageDependency.add(pkgDep);
 			}
 			reportDependencyInformation(resource, position, packageDependency.toArray(new PackageDependency[packageDependency.size()]));
@@ -212,7 +212,7 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 	 */
 	private void reportDependencyInformation(IFile file, FilePosition position, PackageDependency[] pkgs) throws IOException
 	{
-//		AbstractRemoteResource.setDebug(true);
+		//		AbstractRemoteResource.setDebug(true);
 		ArtifactResource[] artifactMatches = ResourceFactory.getResourceFactory().findArtifactResources(pkgs);
 		Map<String,ArtifactResource> matches = new HashMap<String,ArtifactResource>();
 		for (ArtifactResource artifact : artifactMatches)
@@ -233,9 +233,11 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 		}
 
 		List<PackageDependency> packages = new LinkedList<PackageDependency>();
+		List<PackageDependency> allPackages = new LinkedList<PackageDependency>();
 		List<Long> scmIds = new LinkedList<Long>();
 		for(PackageDependency pkg: pkgs)
 		{
+			allPackages.add(pkg);
 			if(matches.containsKey(pkg.getName()))
 			{
 				ArtifactResource artifact = matches.get(pkg.getName());
@@ -252,14 +254,21 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 
 		Long[] tmp = scmIds.toArray(new Long[scmIds.size()]);
 		ScmResource[] scmResources = ResourceFactory.getResourceFactory().findScmResources(ArrayUtils.toPrimitive(tmp));
-		// This should never happen
-		if(scmResources == null) return;
-
-		for(int i = 0; i < packages.size(); i++)
+		
+		// Add SCMs to the appropriate packages
+		if(scmResources != null)
 		{
-			PackageDependency pkg = packages.get(i);
-			pkg.setScm(scmResources[i]);
+			// Set the SCMs
+			for(int i = 0; i < packages.size(); i++)
+			{
+				PackageDependency pkg = packages.get(i);
+				pkg.setScm(scmResources[i]);
+			}
+		}
 
+		// ALL packages are dependencies, not just the ones with SCMs
+		for (PackageDependency pkg : allPackages)
+		{
 			fireDependencyEvent(new DependencyEvent(file, pkg));
 		}
 	}

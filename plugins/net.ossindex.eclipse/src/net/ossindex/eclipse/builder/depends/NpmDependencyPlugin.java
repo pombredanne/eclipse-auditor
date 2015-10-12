@@ -95,7 +95,7 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 				IOUtils.copy(is, writer, "UTF-8");
 				String json = writer.toString();
 				LineIndexer indexer = new LineIndexer(json);
-				
+
 				GsonBuilder builder = new GsonBuilder();
 				Gson gson = builder.create();
 				Reader reader = new StringReader(json);
@@ -247,9 +247,11 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 		}
 
 		List<PackageDependency> packages = new LinkedList<PackageDependency>();
+		List<PackageDependency> allPackages = new LinkedList<PackageDependency>();
 		List<Long> scmIds = new LinkedList<Long>();
 		for(PackageDependency pkg: pkgs)
 		{
+			allPackages.add(pkg);
 			if(matches.containsKey(pkg.getName()))
 			{
 				ArtifactResource artifact = matches.get(pkg.getName());
@@ -266,16 +268,24 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 
 		Long[] tmp = scmIds.toArray(new Long[scmIds.size()]);
 		ScmResource[] scmResources = ResourceFactory.getResourceFactory().findScmResources(ArrayUtils.toPrimitive(tmp));
-		// This should never happen
-		if(scmResources == null) return;
 
-		for(int i = 0; i < packages.size(); i++)
+		// Add SCMs to the appropriate packages
+		if(scmResources != null)
 		{
-			PackageDependency pkg = packages.get(i);
-			pkg.setScm(scmResources[i]);
+			for(int i = 0; i < packages.size(); i++)
+			{
+				PackageDependency pkg = packages.get(i);
+				pkg.setScm(scmResources[i]);
+			}
+		}
 
+
+		// ALL packages are dependencies, not just the ones with SCMs
+		for (PackageDependency pkg : allPackages)
+		{
 			fireDependencyEvent(new DependencyEvent(file, pkg));
 		}
+
 		//		System.err.println("PKGs");
 		//		for(int i = 0; i < packages.size(); i++)
 		//		{

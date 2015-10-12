@@ -94,4 +94,10 @@ public interface IDependencyEvent
 	 * @throws IOException
 	 */
 	VulnerabilityResource[] getVulnerabilities() throws IOException;
+
+	/** Is this an optional dependency?
+	 * 
+	 * @return
+	 */
+	boolean getOptional();
 }

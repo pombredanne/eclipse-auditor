@@ -49,11 +49,17 @@ public class Dependency
 	private String version;
 	private ArtifactResource artifact;
 	private ScmResource scm;
+	private boolean optional = false;
 
 	public Dependency(IMarker marker) throws CoreException
 	{
 		name = (String)marker.getAttribute(DependencyBuilderVisiter.DEPENDENCY_NAME);
 		version = (String)marker.getAttribute(DependencyBuilderVisiter.DEPENDENCY_VERSION);
+		Boolean optional = (Boolean)marker.getAttribute(DependencyBuilderVisiter.DEPENDENCY_OPTIONAL);
+		if(optional != null)
+		{
+			this.optional = optional;
+		}
 		String ids = marker.getAttribute(DependencyBuilderVisiter.DEPENDENCY_ARTIFACT, null);
 		if(ids != null)
 		{
@@ -154,5 +160,14 @@ public class Dependency
 			}
 		}
 		return null;
+	}
+
+	/** Is this an optional dependency?
+	 * 
+	 * @return
+	 */
+	public boolean getOptional()
+	{
+		return optional;
 	}
 }
