@@ -24,74 +24,66 @@
  *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.ossindex.eclipse.builder.depends;
+package net.ossindex.eclipse.views;
 
-import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
-import net.ossindex.common.resource.ArtifactResource;
-import net.ossindex.common.resource.ScmResource;
-import net.ossindex.common.resource.VulnerabilityResource;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.core.resources.IFile;
-
-/** An event indicating something to do with dependencies
+/** Provide contents for the dependency view
  * 
  * @author Ken Duck
  *
  */
-public interface IDependencyEvent
+public class ArtifactContentProvider implements IStructuredContentProvider
 {
-	public enum DependencyEventType {
-	    CLEAR,
-	    ADD
+	private List<Dependency> deps = new LinkedList<Dependency>();
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public void inputChanged(Viewer v, Object oldInput, Object newInput)
+	{
+		if(newInput instanceof List<?>)
+		{
+			List<Dependency> newDeps = new LinkedList<Dependency>();
+			System.err.println("INPUT: " + newInput);
+			@SuppressWarnings("unchecked")
+			List<Object> list = (List<Object>)newInput;
+			for (Object object : list)
+			{
+				if(object instanceof Dependency)
+				{
+					newDeps.add((Dependency)object);
+				}
+			}
+			if(!newDeps.isEmpty())
+			{
+				deps = newDeps;
+			}
+		}
 	}
-
-	/** Get the event type
-	 * 
-	 * @return
-	 */
-	DependencyEventType getType();
-
-	/** Get the source of the dependency
-	 * 
-	 * @return
-	 */
-	IFile getSource();
-
-	/** Get the line number the dependency appears on
-	 * 
-	 * @return
-	 */
-	int getSourceLine();
-	int getOffset();
-	int getLength();
-
-	/** Get a string description of the dependency
-	 * 
-	 * @return
-	 */
-	String getDescription();
-
-	String getName();
-
-	String getVersion();
 	
-	/** Get the artifact
-	 * 
-	 * @return
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 	 */
-	ArtifactResource getArtifact();
+	@Override
+	public void dispose()
+	{
+	}
 	
-	/** Get the SCM
-	 * 
-	 * @return
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 	 */
-	ScmResource getScm();
-
-	/** Get related vulnerabilities
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	VulnerabilityResource[] getVulnerabilities() throws IOException;
+	@Override
+	public Object[] getElements(Object parent)
+	{
+		return deps.toArray(new Dependency[deps.size()]);
+	}
 }

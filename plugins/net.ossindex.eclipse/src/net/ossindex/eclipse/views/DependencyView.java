@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import net.ossindex.common.resource.PackageResource;
 import net.ossindex.eclipse.builder.DependencyBuilderVisiter;
 
 import org.eclipse.core.resources.IFile;
@@ -45,20 +46,29 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.StyledTextContent;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -85,12 +95,19 @@ public class DependencyView extends ViewPart implements CaretListener
 	 */
 	public static final String ID = "net.ossindex.eclipse.views.DependencyView";
 
-	private TableViewer viewer;
+	private TableViewer dependencyViewer;
+	private TableViewer versionViewer;
+	
 	private Action action1;
 	private Action action2;
 	private Action doubleClickAction;
 
 	private Set<IWorkbenchPart> activeEditors = new HashSet<IWorkbenchPart>();
+
+	/**
+	 * Indicate the name of the selected package
+	 */
+	private Label selectedPackageLabel;
 
 	class NameSorter extends ViewerSorter {
 	}
@@ -106,11 +123,29 @@ public class DependencyView extends ViewPart implements CaretListener
 	 * to create the viewer and initialize it.
 	 */
 	public void createPartControl(Composite parent) {
-		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		viewer.setContentProvider(new DependencyContentProvider());
-		viewer.setLabelProvider(new DependencyLabelProvider());
-		viewer.setSorter(new NameSorter());
-		viewer.setInput(getViewSite());
+		Composite composite = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout(1, true);
+		composite.setLayout(layout);
+		
+		selectedPackageLabel = new Label(composite, SWT.NONE);
+		selectedPackageLabel.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT));
+		selectedPackageLabel.setText("<Select package...>");
+		selectedPackageLabel.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 1, 1));
+		
+		Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
+	    separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		SashForm form = new SashForm(composite, SWT.HORIZONTAL);
+		form.setLayout(new FillLayout());
+		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		form.setBackground(form.getDisplay().getSystemColor( SWT.COLOR_GRAY));
+		
+		buildDependencyPanel(form);
+		buildVersionPanel(form);
+		
+		form.setWeights(new int[] {75, 25});
+
+
 
 		//		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(new ISelectionListener()
 		//		{
@@ -206,6 +241,80 @@ public class DependencyView extends ViewPart implements CaretListener
 		//		contributeToActionBars();
 	}
 
+	private void buildVersionPanel(SashForm form)
+	{
+		Composite composite = new Composite(form, SWT.NONE);
+		composite.setBackground(form.getDisplay().getSystemColor( SWT.COLOR_WHITE));
+		GridLayout layout = new GridLayout(1, true);
+		composite.setLayout(layout);
+		
+		Label label = new Label(composite, SWT.NONE);
+		label.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT));
+		label.setText("Available versions");
+		label.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 1, 1));
+		
+		Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
+	    separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	    
+		versionViewer = new TableViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		versionViewer.setContentProvider(new PackageContentProvider());
+		versionViewer.setLabelProvider(new PackageLabelProvider());
+		versionViewer.setSorter(new NameSorter());
+		versionViewer.setInput(getViewSite());
+		
+		Table table = versionViewer.getTable();
+		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+	}
+
+	private void buildDependencyPanel(SashForm form)
+	{
+//		Composite composite = new Composite(form, SWT.NONE);
+//		composite.setBackground(form.getDisplay().getSystemColor( SWT.COLOR_WHITE));
+//		GridLayout layout = new GridLayout(1, true);
+//		composite.setLayout(layout);
+//		
+//		Label label = new Label(composite, SWT.NONE);
+//		label.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT));
+//		label.setText("Package dependencies");
+//		label.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false, 1, 1));
+//		
+//		Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
+//	    separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	    
+		dependencyViewer = new TableViewer(form, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		dependencyViewer.setContentProvider(new ArtifactContentProvider());
+//		dependencyViewer.setLabelProvider(new ArtifactLabelProvider());
+		dependencyViewer.setSorter(new NameSorter());
+		dependencyViewer.setInput(getViewSite());
+		
+//		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+		Table table = dependencyViewer.getTable();
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+//		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		
+		createTableViewerColumn(dependencyViewer, "Package dependencies", 200, 0, true);
+		createTableViewerColumn(dependencyViewer, "Version", null, 1, true);
+		createTableViewerColumn(dependencyViewer, "Description", 400, 1, true);
+	}
+
+	private TableViewerColumn createTableViewerColumn(TableViewer viewer, final String title, final Integer bound, final int colNumber, boolean enableSorting)
+	{
+		TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.LEFT);
+		final TableColumn column = viewerColumn.getColumn();
+		column.setText(title);
+		column.setResizable(true);
+		column.setMoveable(true);
+		if (enableSorting == true)
+		{
+			//column.addSelectionListener(getSelectionAdapter(viewer, column, colNumber));
+		}
+		if(bound != null) column.setWidth(bound);
+		else column.pack();
+		viewerColumn.setLabelProvider(new ArtifactCellLabelProvider());
+		return viewerColumn;
+	}
+
 	/**
 	 * 
 	 * @param part
@@ -255,9 +364,9 @@ public class DependencyView extends ViewPart implements CaretListener
 				DependencyView.this.fillContextMenu(manager);
 			}
 		});
-		Menu menu = menuMgr.createContextMenu(viewer.getControl());
-		viewer.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuMgr, viewer);
+		Menu menu = menuMgr.createContextMenu(dependencyViewer.getControl());
+		dependencyViewer.getControl().setMenu(menu);
+		getSite().registerContextMenu(menuMgr, dependencyViewer);
 	}
 
 	private void contributeToActionBars() {
@@ -306,7 +415,7 @@ public class DependencyView extends ViewPart implements CaretListener
 				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
 		doubleClickAction = new Action() {
 			public void run() {
-				ISelection selection = viewer.getSelection();
+				ISelection selection = dependencyViewer.getSelection();
 				Object obj = ((IStructuredSelection)selection).getFirstElement();
 				showMessage("Double-click detected on "+obj.toString());
 			}
@@ -314,7 +423,7 @@ public class DependencyView extends ViewPart implements CaretListener
 	}
 
 	private void hookDoubleClickAction() {
-		viewer.addDoubleClickListener(new IDoubleClickListener() {
+		dependencyViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				doubleClickAction.run();
 			}
@@ -322,7 +431,7 @@ public class DependencyView extends ViewPart implements CaretListener
 	}
 	private void showMessage(String message) {
 		MessageDialog.openInformation(
-				viewer.getControl().getShell(),
+				dependencyViewer.getControl().getShell(),
 				"Dependencies",
 				message);
 	}
@@ -331,7 +440,7 @@ public class DependencyView extends ViewPart implements CaretListener
 	 * Passing the focus request to the viewer's control.
 	 */
 	public void setFocus() {
-		viewer.getControl().setFocus();
+		dependencyViewer.getControl().setFocus();
 	}
 
 	/** Show the dependency information for the selected dependency
@@ -433,7 +542,15 @@ public class DependencyView extends ViewPart implements CaretListener
 				}
 			}
 			
-			if(!deps.isEmpty()) viewer.setInput(deps);
+			if(!deps.isEmpty()) {
+				// The top dependency is the selected dependency (?)
+				Dependency dep = deps.get(0);
+				selectedPackageLabel.setText(dep.getName() + " " + dep.getVersion());
+				dependencyViewer.setInput(deps);
+				
+				PackageResource pkg = dep.getPackage();
+				versionViewer.setInput(pkg);
+			}
 		}
 	}
 }

@@ -24,74 +24,53 @@
  *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.ossindex.eclipse.builder.depends;
+package net.ossindex.eclipse.views;
 
-import java.io.IOException;
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.swt.graphics.Image;
 
-import net.ossindex.common.resource.ArtifactResource;
-import net.ossindex.common.resource.ScmResource;
-import net.ossindex.common.resource.VulnerabilityResource;
-
-import org.eclipse.core.resources.IFile;
-
-/** An event indicating something to do with dependencies
+/**
  * 
  * @author Ken Duck
  *
  */
-public interface IDependencyEvent
-{
-	public enum DependencyEventType {
-	    CLEAR,
-	    ADD
+public class ArtifactCellLabelProvider extends CellLabelProvider {
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.CellLabelProvider#update(org.eclipse.jface.viewers.ViewerCell)
+	 */
+	@Override
+	public void update(ViewerCell cell)
+	{
+		final Object entry = (Object) cell.getElement();
+		final StyledString styledString = new StyledString(getColumnText(entry, cell.getColumnIndex()));
+
+		cell.setText(styledString.toString());
+		cell.setStyleRanges(styledString.getStyleRanges());
+		cell.setImage(getImage(entry, cell.getColumnIndex()));
 	}
 
-	/** Get the event type
-	 * 
-	 * @return
-	 */
-	DependencyEventType getType();
+	private String getColumnText(Object entry, int index) {
+		if(entry instanceof Dependency)
+		{
+			Dependency dep = (Dependency)entry;
+			switch(index)
+			{
+			case 0:
+				return dep.getName();
+			case 1:
+				return dep.getVersion();
+			case 2:
+				return dep.getDescription();
+			}
+		}
+		return entry.toString();
+	}
 
-	/** Get the source of the dependency
-	 * 
-	 * @return
-	 */
-	IFile getSource();
-
-	/** Get the line number the dependency appears on
-	 * 
-	 * @return
-	 */
-	int getSourceLine();
-	int getOffset();
-	int getLength();
-
-	/** Get a string description of the dependency
-	 * 
-	 * @return
-	 */
-	String getDescription();
-
-	String getName();
-
-	String getVersion();
-	
-	/** Get the artifact
-	 * 
-	 * @return
-	 */
-	ArtifactResource getArtifact();
-	
-	/** Get the SCM
-	 * 
-	 * @return
-	 */
-	ScmResource getScm();
-
-	/** Get related vulnerabilities
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	VulnerabilityResource[] getVulnerabilities() throws IOException;
+	private Image getImage(Object entry, int columnIndex) {
+		return null;
+	}
 }

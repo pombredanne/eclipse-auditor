@@ -26,6 +26,12 @@
  */
 package net.ossindex.eclipse.views;
 
+import java.io.IOException;
+
+import net.ossindex.common.ResourceFactory;
+import net.ossindex.common.resource.ArtifactResource;
+import net.ossindex.common.resource.PackageResource;
+import net.ossindex.common.resource.ScmResource;
 import net.ossindex.eclipse.builder.DependencyBuilderVisiter;
 
 import org.eclipse.core.resources.IMarker;
@@ -41,11 +47,47 @@ public class Dependency
 
 	private String name;
 	private String version;
+	private ArtifactResource artifact;
+	private ScmResource scm;
 
 	public Dependency(IMarker marker) throws CoreException
 	{
 		name = (String)marker.getAttribute(DependencyBuilderVisiter.DEPENDENCY_NAME);
 		version = (String)marker.getAttribute(DependencyBuilderVisiter.DEPENDENCY_VERSION);
+		String ids = marker.getAttribute(DependencyBuilderVisiter.DEPENDENCY_ARTIFACT, null);
+		if(ids != null)
+		{
+			try
+			{
+				long id = Long.parseLong(ids);
+				artifact = ResourceFactory.getResourceFactory().createResource(ArtifactResource.class, id);
+			}
+			catch(NumberFormatException e)
+			{
+				// Ignore
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		ids = marker.getAttribute(DependencyBuilderVisiter.DEPENDENCY_SCM, null);
+		if(ids != null)
+		{
+			try
+			{
+				long id = Long.parseLong(ids);
+				scm = ResourceFactory.getResourceFactory().createResource(ScmResource.class, id);
+			}
+			catch(NumberFormatException e)
+			{
+				// Ignore
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/*
@@ -56,5 +98,61 @@ public class Dependency
 	public String toString()
 	{
 		return name + " " + version;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+	
+	public String getVersion()
+	{
+		return version;
+	}
+
+	/** Get a description for the dependency if possible
+	 * 
+	 * @return
+	 */
+	public String getDescription()
+	{
+		if(artifact != null)
+		{
+			String desc = artifact.getDescription();
+			if(desc != null && !desc.trim().isEmpty())
+			{
+				return desc;
+			}
+		}
+		if(scm != null)
+		{
+			String desc = scm.getDescription();
+			if(desc != null && !desc.trim().isEmpty())
+			{
+				return desc;
+			}
+		}
+
+		return null;
+	}
+
+	/** Get the package for the dependency, if it exists.
+	 * 
+	 * @return
+	 */
+	public PackageResource getPackage()
+	{
+		if(artifact != null)
+		{
+			try
+			{
+				return artifact.getPackage();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return null;
 	}
 }

@@ -26,6 +26,8 @@
  */
 package net.ossindex.eclipse.views;
 
+import net.ossindex.common.resource.ArtifactResource;
+
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -37,7 +39,7 @@ import org.eclipse.ui.PlatformUI;
  * @author Ken Duck
  *
  */
-class DependencyLabelProvider extends LabelProvider implements ITableLabelProvider
+class PackageLabelProvider extends LabelProvider implements ITableLabelProvider
 {
 	/*
 	 * (non-Javadoc)
@@ -46,6 +48,10 @@ class DependencyLabelProvider extends LabelProvider implements ITableLabelProvid
 	@Override
 	public String getColumnText(Object obj, int index)
 	{
+		if(obj instanceof ArtifactResource)
+		{
+			return ((ArtifactResource)obj).getVersionString();
+		}
 		return getText(obj);
 	}
 	

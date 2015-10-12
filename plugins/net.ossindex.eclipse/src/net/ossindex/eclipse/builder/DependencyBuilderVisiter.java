@@ -3,6 +3,8 @@ package net.ossindex.eclipse.builder;
 import java.io.IOException;
 import java.util.List;
 
+import net.ossindex.common.resource.ArtifactResource;
+import net.ossindex.common.resource.ScmResource;
 import net.ossindex.common.resource.VulnerabilityResource;
 import net.ossindex.eclipse.Activator;
 import net.ossindex.eclipse.builder.depends.IDependencyEvent;
@@ -26,6 +28,9 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 	public static final String DEPENDENCY_VERSION = "net.ossindex.eclipse.marker.version";
 	public static final String DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.DependencyMarker";
 	public static final String DEPENDENCY_URL = "net.ossindex.eclipse.marker.url";
+	public static final String DEPENDENCY_ARTIFACT = "net.ossindex.eclipse.marker.artifactId";
+	public static final String DEPENDENCY_SCM = "net.ossindex.eclipse.marker.scmId";
+	
 	public static final String VULNERABILITY_ID = "net.ossindex.eclipse.marker.id";
 	public static final String VULNERABILITY_MARKER = "net.ossindex.eclipse.marker.VulnerabilityMarker";
 	public static final String VULNERABILITY_SUMMARY = "net.ossindex.eclipse.marker.summary";
@@ -158,6 +163,8 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 		String name = event.getName();
 		String version = event.getVersion();
 		String description = event.getDescription();
+		ScmResource scm = event.getScm();
+		ArtifactResource artifact = event.getArtifact();
 		
 		System.err.println("ADD DEPENDENCY: " + source + ": " + line);
 
@@ -170,6 +177,14 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 			m.setAttribute(IMarker.MESSAGE, description);
 			m.setAttribute(DEPENDENCY_NAME, name);
 			m.setAttribute(DEPENDENCY_VERSION, version);
+			if(scm != null)
+			{
+				m.setAttribute(DEPENDENCY_SCM, Long.toString(scm.getId()));
+			}
+			if(artifact != null)
+			{
+				m.setAttribute(DEPENDENCY_ARTIFACT, Long.toString(artifact.getId()));
+			}
 		}
 		catch(CoreException e)
 		{

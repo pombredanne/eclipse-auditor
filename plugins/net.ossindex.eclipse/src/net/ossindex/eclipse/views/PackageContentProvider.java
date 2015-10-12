@@ -26,8 +26,12 @@
  */
 package net.ossindex.eclipse.views;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import net.ossindex.common.resource.ArtifactResource;
+import net.ossindex.common.resource.PackageResource;
+import net.ossindex.version.IVersion;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -37,9 +41,9 @@ import org.eclipse.jface.viewers.Viewer;
  * @author Ken Duck
  *
  */
-public class DependencyContentProvider implements IStructuredContentProvider
+public class PackageContentProvider implements IStructuredContentProvider
 {
-	private List<Dependency> deps = new LinkedList<Dependency>();
+	private PackageResource pkg = null;
 
 	/*
 	 * (non-Javadoc)
@@ -48,26 +52,16 @@ public class DependencyContentProvider implements IStructuredContentProvider
 	@Override
 	public void inputChanged(Viewer v, Object oldInput, Object newInput)
 	{
-		if(newInput instanceof List<?>)
+		if(newInput instanceof PackageResource)
 		{
-			List<Dependency> newDeps = new LinkedList<Dependency>();
-			System.err.println("INPUT: " + newInput);
-			@SuppressWarnings("unchecked")
-			List<Object> list = (List<Object>)newInput;
-			for (Object object : list)
-			{
-				if(object instanceof Dependency)
-				{
-					newDeps.add((Dependency)object);
-				}
-			}
-			if(!newDeps.isEmpty())
-			{
-				deps = newDeps;
-			}
+			pkg = (PackageResource) newInput;
+		}
+		else
+		{
+			pkg = null;
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
@@ -76,7 +70,7 @@ public class DependencyContentProvider implements IStructuredContentProvider
 	public void dispose()
 	{
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
@@ -84,6 +78,20 @@ public class DependencyContentProvider implements IStructuredContentProvider
 	@Override
 	public Object[] getElements(Object parent)
 	{
-		return deps.toArray(new Dependency[deps.size()]);
+		Map<IVersion,ArtifactResource> results = new TreeMap<IVersion, ArtifactResource>();
+		if(pkg != null)
+		{
+			ArtifactResource[] artifacts = pkg.getArtifacts();
+			for (ArtifactResource artifact : artifacts)
+			{
+				IVersion version = artifact.getVersion();
+				if(!results.containsKey(version))
+				{
+					// FIXME: We should ensure the correct artifact is added to the result list
+					results.put(version, artifact);
+				}
+			}
+		}
+		return results.values().toArray();
 	}
 }

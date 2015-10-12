@@ -28,6 +28,8 @@ package net.ossindex.eclipse.builder.depends;
 
 import java.io.IOException;
 
+import net.ossindex.common.resource.ArtifactResource;
+import net.ossindex.common.resource.ScmResource;
 import net.ossindex.common.resource.VulnerabilityResource;
 import net.ossindex.common.utils.PackageDependency;
 
@@ -159,5 +161,27 @@ public class DependencyEvent implements IDependencyEvent
 	public VulnerabilityResource[] getVulnerabilities() throws IOException
 	{
 		return pkg.getVulnerabilities();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.ossindex.eclipse.builder.depends.IDependencyEvent#getArtifact()
+	 */
+	@Override
+	public ArtifactResource getArtifact()
+	{
+		if(pkg != null) return pkg.getArtifact();
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.ossindex.eclipse.builder.depends.IDependencyEvent#getScm()
+	 */
+	@Override
+	public ScmResource getScm()
+	{
+		if(pkg != null) return pkg.getScm();
+		return null;
 	}
 }
