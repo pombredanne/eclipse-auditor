@@ -44,7 +44,9 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 	private List<IDependencyPlugin> plugins;
 	
 	/**
-	 * Files/Folders to ignore
+	 * Files/Folders to ignore.
+	 * 
+	 * FIXME: We should query plugins for these.
 	 */
 	private static Set<String> ignore = new HashSet<String>();
 	static

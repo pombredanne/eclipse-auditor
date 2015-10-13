@@ -102,17 +102,22 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 				PackageJson pkg = gson.fromJson(reader, PackageJson.class);
 				//List<Dependency> deps = processDependencies(file);
 
+				Map<String, String> deps = new HashMap<String,String>();
 				if(pkg != null)
 				{
-					Map<String, String> deps = pkg.getDependencies();
-					processDependencies(file, deps, indexer);
-
-					deps = pkg.getOptionalDependencies();
-					processDependencies(file, deps, indexer);
-
-					deps = pkg.getDevDependencies();
-					processDependencies(file, deps, indexer);
+					Map<String, String> tmp = pkg.getDependencies();
+					if(tmp != null) deps.putAll(tmp);
+					tmp = pkg.getOptionalDependencies();
+					if(tmp != null) deps.putAll(tmp);
+					tmp = pkg.getDevDependencies();
+					if(tmp != null) deps.putAll(tmp);
 				}
+
+				for(Map.Entry<String, String> entry: deps.entrySet())
+				{
+					getDependencies(file, indexer, entry.getKey(), entry.getValue());
+				}
+
 				reader.close();
 			}
 			catch(IOException | CoreException e)
@@ -124,6 +129,102 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 
 	}
 
+
+	private void getDependencies(IFile file, LineIndexer indexer, String pkgName, String version) throws IOException
+	{
+		FilePosition position = indexer.getFirst("\"" + pkgName + "\"");
+
+		// Local system dependencies should be converted to checksums
+		if(version.startsWith("file:"))
+		{
+		}
+		else if(version.indexOf("://") > 0)
+		{
+		}
+		else if(version.indexOf('/') > 0)
+		{
+		}
+		else
+		{
+			List<PackageDependency> packageDependency = new LinkedList<PackageDependency>();
+
+			PackageDependency pkg = new PackageDependency(position, "npm", pkgName, version);
+			ArtifactResource[] artifactMatches = ResourceFactory.getResourceFactory().findArtifactResources(new PackageDependency[] {pkg});
+			if(artifactMatches != null)
+			{
+				ArtifactResource match = null;
+				for (ArtifactResource artifact : artifactMatches)
+				{
+					if(match == null || artifact.compareTo(match) < 0)
+					{
+						match = artifact;
+					}
+				}
+
+				reportDependencyInformation(file, position, match);
+			}
+			//			packageDependency.add(new PackageDependency(position, "npm", pkgName, version));
+			//				config.addDependency(file, "npm", pkgName, version, comment);
+		}
+
+	}
+
+	/**
+	 * 
+	 * @param file
+	 * @param position
+	 * @param artifact
+	 * @throws IOException 
+	 */
+	private void reportDependencyInformation(IFile file, FilePosition position, ArtifactResource artifact) throws IOException
+	{
+		ArtifactResource[] deps = artifact.getDependencyGraph();
+		List<PackageDependency> allPackages = new LinkedList<PackageDependency>();
+		if(deps != null)
+		{
+			for (ArtifactResource dep : deps)
+			{
+				PackageDependency pkg = new PackageDependency(position, "npm", dep.getPackageName(), dep.getVersionString());
+				pkg.setArtifact(dep);
+				allPackages.add(pkg);
+			}
+		}
+
+		List<Long> scmIds = new LinkedList<Long>();
+		List<PackageDependency> packages = new LinkedList<PackageDependency>();
+		for(PackageDependency pkg: allPackages)
+		{
+			ArtifactResource art = pkg.getArtifact();
+			long scmId = art.getScmId();
+			// only continue with the artifact if it has a known SCM id.
+			if(scmId > 0)
+			{
+				packages.add(pkg);
+				scmIds.add(art.getScmId());
+			}
+		}
+
+		Long[] tmp = scmIds.toArray(new Long[scmIds.size()]);
+		ScmResource[] scmResources = ResourceFactory.getResourceFactory().findScmResources(ArrayUtils.toPrimitive(tmp));
+
+		// Add SCMs to the appropriate packages
+		if(scmResources != null)
+		{
+			for(int i = 0; i < packages.size(); i++)
+			{
+				PackageDependency pkg = packages.get(i);
+				pkg.setScm(scmResources[i]);
+			}
+		}
+
+
+		// ALL packages are dependencies, not just the ones with SCMs
+		for (PackageDependency pkg : allPackages)
+		{
+			fireDependencyEvent(new DependencyEvent(file, pkg));
+		}
+
+	}
 
 	/**
 	 * 
