@@ -153,6 +153,7 @@
    <extension
          point="org.eclipse.ui.editors.annotationTypes">
       <type
+            markerSeverity="0"
             markerType="net.ossindex.eclipse.marker.DependencyMarker"
             name="net.ossindex.eclipse.marker.DependencyMarker">
       </type>
@@ -230,6 +231,82 @@
             id="net.ossindex.eclipse.views.DependencyView"
             name="Dependencies">
       </view>
+   </extension>
+   <extension
+         id="net.ossindex.eclipse.marker.OptionalDependencyMarker"
+         name="Optional Dependency"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="net.ossindex.eclipse.marker.DependencyMarker">
+      </super>
+   </extension>
+   <extension
+         id="net.ossindex.eclipse.marker.WarningDependencyMarker"
+         name="Old Dependency"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="net.ossindex.eclipse.marker.DependencyMarker">
+      </super>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerSeverity="1"
+            markerType="net.ossindex.eclipse.marker.WarningDependencyMarker"
+            name="net.ossindex.eclipse.marker.WarningDependencyMarker"
+            super="net.ossindex.eclipse.marker.DependencyMarker">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerSeverity="1"
+            markerType="net.ossindex.eclipse.marker.OptionalDependencyMarker"
+            name="net.ossindex.eclipse.marker.OptionalDependencyMarker"
+            super="net.ossindex.eclipse.marker.DependencyMarker">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="net.ossindex.eclipse.marker.OptionalDependencyMarker"
+            colorPreferenceKey="net.ossindex.eclipse.omarker.color"
+            colorPreferenceValue="192,192,255"
+            contributesToHeader="false"
+            highlightPreferenceKey="net.ossindex.eclipse.omarker.highlight"
+            highlightPreferenceValue="true"
+            includeOnPreferencePage="true"
+            label="Optional Dependency Marker"
+            overviewRulerPreferenceKey="net.ossindex.eclipse.omarker.overview"
+            overviewRulerPreferenceValue="true"
+            presentationLayer="0"
+            textPreferenceKey="net.ossindex.eclipse.omarker.text"
+            textPreferenceValue="true"
+            textStylePreferenceValue="BOX"
+            verticalRulerPreferenceKey="net.ossindex.eclipse.omarker.ruler"
+            verticalRulerPreferenceValue="true">
+      </specification>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="net.ossindex.eclipse.marker.WarningDependencyMarker"
+            colorPreferenceKey="net.ossindex.eclipse.wmarker.color"
+            colorPreferenceValue="255,255,192"
+            contributesToHeader="false"
+            highlightPreferenceKey="net.ossindex.eclipse.wmarker.highlight"
+            highlightPreferenceValue="true"
+            includeOnPreferencePage="true"
+            label="Warning Dependency Marker"
+            overviewRulerPreferenceKey="net.ossindex.eclipse.wmarker.overview"
+            overviewRulerPreferenceValue="true"
+            presentationLayer="0"
+            textPreferenceKey="net.ossindex.eclipse.wmarker.text"
+            textPreferenceValue="true"
+            textStylePreferenceValue="BOX"
+            verticalRulerPreferenceKey="net.ossindex.eclipse.wmarker.ruler"
+            verticalRulerPreferenceValue="true">
+      </specification>
    </extension>
 
 </plugin>

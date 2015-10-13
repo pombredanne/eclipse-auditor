@@ -110,9 +110,6 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 	@Override
 	public void run(IResource resource)
 	{
-		System.err.println("WAT: " + resource);
-
-
 		InputStream is = null;
 		try
 		{

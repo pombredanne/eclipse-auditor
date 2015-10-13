@@ -1,7 +1,9 @@
 package net.ossindex.eclipse.builder;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.ossindex.common.resource.ArtifactResource;
 import net.ossindex.common.resource.ScmResource;
@@ -12,6 +14,7 @@ import net.ossindex.eclipse.builder.depends.IDependencyListener;
 import net.ossindex.eclipse.builder.depends.IDependencyPlugin;
 import net.ossindex.eclipse.common.builder.CommonBuildVisitor;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -28,6 +31,8 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 	public static final String DEPENDENCY_VERSION = "net.ossindex.eclipse.marker.version";
 	public static final String DEPENDENCY_OPTIONAL = "net.ossindex.eclipse.marker.optional";
 	public static final String DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.DependencyMarker";
+	public static final String OPTIONAL_DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.OptionalDependencyMarker";
+	public static final String WARNING_DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.WarningDependencyMarker";
 	public static final String DEPENDENCY_URL = "net.ossindex.eclipse.marker.url";
 	public static final String DEPENDENCY_ARTIFACT = "net.ossindex.eclipse.marker.artifactId";
 	public static final String DEPENDENCY_SCM = "net.ossindex.eclipse.marker.scmId";
@@ -37,6 +42,15 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 	public static final String VULNERABILITY_SUMMARY = "net.ossindex.eclipse.marker.summary";
 
 	private List<IDependencyPlugin> plugins;
+	
+	/**
+	 * Files/Folders to ignore
+	 */
+	private static Set<String> ignore = new HashSet<String>();
+	static
+	{
+		ignore.add("node_modules");
+	}
 
 	/**
 	 * Progress monitor
@@ -74,6 +88,9 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 	{
 		// Handle cancellation
 		if(progress.isCanceled()) return false;
+		
+		// FIXME: Perhaps make this optional
+		if(ignore.contains(resource.getName())) return false;
 
 		// Don't run if this file is not considered dirty at this time.
 		if(isDirty((IFile)resource))
@@ -120,6 +137,17 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 			}
 		}
 		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see net.ossindex.eclipse.common.builder.CommonBuildVisitor#acceptsContainer(org.eclipse.core.resources.IContainer)
+	 */
+	@Override
+	protected boolean acceptsContainer(IContainer resource)
+	{
+		// FIXME: Perhaps make this optional
+		return !ignore.contains(resource.getName());
 	}
 
 	/*
@@ -171,7 +199,15 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 
 		try
 		{
-			IMarker m = source.createMarker(DEPENDENCY_MARKER);
+			IMarker m = null;
+//			if(event.getOptional())
+//			{
+//				m = source.createMarker(OPTIONAL_DEPENDENCY_MARKER);
+//			}
+//			else
+			{
+				m = source.createMarker(DEPENDENCY_MARKER);
+			}
 			m.setAttribute(IMarker.LINE_NUMBER, line);
 			m.setAttribute(IMarker.CHAR_START, charBegin);
 			m.setAttribute(IMarker.CHAR_END, charEnd);
