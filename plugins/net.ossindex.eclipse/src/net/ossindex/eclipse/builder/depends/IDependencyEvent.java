@@ -100,4 +100,10 @@ public interface IDependencyEvent
 	 * @return
 	 */
 	boolean getOptional();
+
+	/** Is this a root dependency (which has an annotation?)
+	 * 
+	 * @return
+	 */
+	boolean isRoot();
 }

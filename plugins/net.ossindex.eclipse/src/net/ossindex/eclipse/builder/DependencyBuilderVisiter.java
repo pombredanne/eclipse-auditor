@@ -31,6 +31,7 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 	public static final String DEPENDENCY_VERSION = "net.ossindex.eclipse.marker.version";
 	public static final String DEPENDENCY_OPTIONAL = "net.ossindex.eclipse.marker.optional";
 	public static final String DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.DependencyMarker";
+	public static final String ROOT_DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.RootDependencyMarker";
 	public static final String OPTIONAL_DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.OptionalDependencyMarker";
 	public static final String WARNING_DEPENDENCY_MARKER = "net.ossindex.eclipse.marker.WarningDependencyMarker";
 	public static final String DEPENDENCY_URL = "net.ossindex.eclipse.marker.url";
@@ -197,16 +198,24 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 		ScmResource scm = event.getScm();
 		ArtifactResource artifact = event.getArtifact();
 		
-		System.err.println("ADD DEPENDENCY: " + source + ": " + line);
+		if(event.isRoot()) System.err.println("ADD DEPENDENCY: [ROOT] " + source + ": " + line);
+		else System.err.println("ADD DEPENDENCY: " + source + ": " + line);
 
 		try
 		{
 			IMarker m = null;
-//			if(event.getOptional())
-//			{
-//				m = source.createMarker(OPTIONAL_DEPENDENCY_MARKER);
-//			}
-//			else
+			if(event.isRoot())
+			{
+				if(event.getOptional())
+				{
+					m = source.createMarker(OPTIONAL_DEPENDENCY_MARKER);
+				}
+				else
+				{
+					m = source.createMarker(ROOT_DEPENDENCY_MARKER);
+				}
+			}
+			else
 			{
 				m = source.createMarker(DEPENDENCY_MARKER);
 			}

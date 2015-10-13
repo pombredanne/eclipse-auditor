@@ -185,10 +185,17 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 			
 			List<Dependency> deps = nlg.getDependencies(false);
 			List<PackageDependency> packageDependency = new LinkedList<PackageDependency>();
+			boolean rootDep = true;
 			for (Dependency dep : deps)
 			{
 				Artifact artifact = dep.getArtifact();
 				PackageDependency pkgDep = new PackageDependency(position, "maven", artifact.getArtifactId(), artifact.getVersion());
+				if(rootDep)
+				{
+					// First package is the root
+					pkgDep.setIsRoot(true);
+					rootDep = false;
+				}
 				pkgDep.setOptional(dep.getOptional());
 				packageDependency.add(pkgDep);
 			}

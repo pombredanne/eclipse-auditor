@@ -380,6 +380,18 @@ public class DependencyView extends ViewPart implements ICursorListener
 			{
 				return new Dependency(marker);
 			}
+			if(DependencyBuilderVisiter.ROOT_DEPENDENCY_MARKER.equals(marker.getType()))
+			{
+				return new Dependency(marker);
+			}
+			if(DependencyBuilderVisiter.OPTIONAL_DEPENDENCY_MARKER.equals(marker.getType()))
+			{
+				return new Dependency(marker);
+			}
+			if(DependencyBuilderVisiter.WARNING_DEPENDENCY_MARKER.equals(marker.getType()))
+			{
+				return new Dependency(marker);
+			}
 		}
 		catch (CoreException e)
 		{
@@ -397,6 +409,8 @@ public class DependencyView extends ViewPart implements ICursorListener
 	{
 		IFile file = event.getFile();
 		int line = event.getLine();
+		
+		Dependency rootDep = null;
 
 		// We have a file and a line number now. Find the dependencies...
 		List<Dependency> deps = new LinkedList<Dependency>();
@@ -412,6 +426,10 @@ public class DependencyView extends ViewPart implements ICursorListener
 					if(dep != null)
 					{
 						deps.add(dep);
+						if(marker.isSubtypeOf(DependencyBuilderVisiter.ROOT_DEPENDENCY_MARKER))
+						{
+							rootDep = dep;
+						}
 					}
 				}
 			}
@@ -421,14 +439,19 @@ public class DependencyView extends ViewPart implements ICursorListener
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		if(!deps.isEmpty()) {
+		
+		if(rootDep == null && !deps.isEmpty())
+		{
 			// The top dependency is the selected dependency (?)
-			Dependency dep = deps.get(0);
-			selectedPackageLabel.setText(dep.getName() + " " + dep.getVersion());
+			rootDep = deps.get(0);
+		}
+		
+		if(rootDep != null)
+		{
+			selectedPackageLabel.setText(rootDep.getName() + " " + rootDep.getVersion());
 			dependencyViewer.setInput(deps);
 
-			PackageResource pkg = dep.getPackage();
+			PackageResource pkg = rootDep.getPackage();
 			versionViewer.setInput(pkg);
 		}
 	}

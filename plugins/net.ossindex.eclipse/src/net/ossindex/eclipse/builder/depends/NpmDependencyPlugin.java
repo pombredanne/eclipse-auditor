@@ -42,6 +42,7 @@ import net.ossindex.common.resource.ScmResource;
 import net.ossindex.common.utils.FilePosition;
 import net.ossindex.common.utils.LineIndexer;
 import net.ossindex.common.utils.PackageDependency;
+import net.ossindex.version.IVersion;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -146,22 +147,25 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 		}
 		else
 		{
-			List<PackageDependency> packageDependency = new LinkedList<PackageDependency>();
-
 			PackageDependency pkg = new PackageDependency(position, "npm", pkgName, version);
+			pkg.setIsRoot(true);
 			ArtifactResource[] artifactMatches = ResourceFactory.getResourceFactory().findArtifactResources(new PackageDependency[] {pkg});
 			if(artifactMatches != null)
 			{
 				ArtifactResource match = null;
 				for (ArtifactResource artifact : artifactMatches)
 				{
-					if(match == null || artifact.compareTo(match) < 0)
+					IVersion ver = artifact.getVersion();
+					if(ver.satisfies(version))
 					{
-						match = artifact;
+						if(match == null || artifact.compareTo(match) < 0)
+						{
+							match = artifact;
+						}
 					}
 				}
 
-				reportDependencyInformation(file, position, match);
+				reportDependencyInformation(file, position, pkg, match);
 			}
 			//			packageDependency.add(new PackageDependency(position, "npm", pkgName, version));
 			//				config.addDependency(file, "npm", pkgName, version, comment);
@@ -173,10 +177,11 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 	 * 
 	 * @param file
 	 * @param position
+	 * @param rootPkg 
 	 * @param artifact
 	 * @throws IOException 
 	 */
-	private void reportDependencyInformation(IFile file, FilePosition position, ArtifactResource artifact) throws IOException
+	private void reportDependencyInformation(IFile file, FilePosition position, PackageDependency rootPkg, ArtifactResource artifact) throws IOException
 	{
 		ArtifactResource[] deps = artifact.getDependencyGraph();
 		List<PackageDependency> allPackages = new LinkedList<PackageDependency>();
@@ -186,6 +191,10 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 			{
 				PackageDependency pkg = new PackageDependency(position, "npm", dep.getPackageName(), dep.getVersionString());
 				pkg.setArtifact(dep);
+				if(rootPkg.getName().equals(dep.getPackageName()))
+				{
+					pkg.setIsRoot(true);
+				}
 				allPackages.add(pkg);
 			}
 		}
@@ -225,187 +234,6 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 		}
 
 	}
-
-	/**
-	 * 
-	 * @param file
-	 * @param deps
-	 * @param indexer 
-	 * @comment A comment to add to each of these dependencies
-	 */
-	private void processDependencies(IFile file, Map<String, String> deps, LineIndexer indexer) throws IOException
-	{
-		if(deps == null) return;
-
-		List<PackageDependency> packageDependency = new LinkedList<PackageDependency>();
-
-		for(Map.Entry<String,String> entry: deps.entrySet())
-		{
-			String pkgName = entry.getKey();
-			String version = entry.getValue();
-
-			// Local system dependencies should be converted to checksums
-			if(version.startsWith("file:"))
-			{
-				//				try
-				//				{
-				//					version = getChecksum(file, version.substring(5));
-				//					if(version != null)
-				//					{
-				//						config.addDependency(file, "npm", pkgName, version, comment);
-				//					}
-				//				}
-				//				catch(IOException e)
-				//				{
-				//					System.err.println("Exception handling " + version + ": " + e.getMessage());
-				//				}
-			}
-			else if(version.indexOf("://") > 0)
-			{
-				//				try
-				//				{
-				//					config.addDependency(file, "npm", new URI(version), comment);
-				//				}
-				//				catch (URISyntaxException e)
-				//				{
-				//					System.err.println("Exception parsing uri " + version + ": " + e.getMessage());
-				//				}
-			}
-			else if(version.indexOf('/') > 0)
-			{
-				//				try
-				//				{
-				//					config.addDependency(file, "npm", new URI("git://" + version), comment);
-				//				}
-				//				catch (URISyntaxException e)
-				//				{
-				//					System.err.println("Exception parsing uri " + version + ": " + e.getMessage());
-				//				}
-			}
-			else
-			{
-				FilePosition position = indexer.getFirst("\"" + pkgName + "\"");
-				packageDependency.add(new PackageDependency(position, "npm", pkgName, version));
-				//				config.addDependency(file, "npm", pkgName, version, comment);
-			}
-		}
-
-		processPackageDependency(file, packageDependency);
-	}
-
-	/** Get the SHA checksum for a file found relative to the specified location
-	 * 
-	 * @param file File which the path may be relative to
-	 * @param path
-	 * @return
-	 * @throws IOException 
-	 * @throws CoreException 
-	 */
-	private String getChecksum(IFile file, String path) throws IOException, CoreException
-	{
-		InputStream is = null;
-		try
-		{
-			is = file.getContents();
-			return DigestUtils.shaHex(is);
-		}
-		finally
-		{
-			if(is != null)
-			{
-				is.close();
-			}
-		}
-	}
-
-	/**
-	 * 
-	 * @param packageDependency
-	 * @throws IOException 
-	 */
-	private void processPackageDependency(IFile file, List<PackageDependency> packageDependencies) throws IOException
-	{
-		// Find matching artifacts for the packages
-		PackageDependency[] pkgs = packageDependencies.toArray(new PackageDependency[packageDependencies.size()]);
-		ArtifactResource[] artifactMatches = ResourceFactory.getResourceFactory().findArtifactResources(pkgs);
-
-		Map<String,ArtifactResource> matches = new HashMap<String,ArtifactResource>();
-		for (ArtifactResource artifact : artifactMatches)
-		{
-			if(artifact != null)
-			{
-				String name = artifact.getPackageName();
-				if(!matches.containsKey(name))
-				{
-					matches.put(name, artifact);
-				}
-				else
-				{
-					ArtifactResource ar = matches.get(name);
-					if(artifact.compareTo(ar) > 0) matches.put(name, artifact);
-				}
-			}
-		}
-
-		List<PackageDependency> packages = new LinkedList<PackageDependency>();
-		List<PackageDependency> allPackages = new LinkedList<PackageDependency>();
-		List<Long> scmIds = new LinkedList<Long>();
-		for(PackageDependency pkg: pkgs)
-		{
-			allPackages.add(pkg);
-			if(matches.containsKey(pkg.getName()))
-			{
-				ArtifactResource artifact = matches.get(pkg.getName());
-				long scmId = artifact.getScmId();
-				// only continue with the artifact if it has a known SCM id.
-				if(scmId > 0)
-				{
-					pkg.setArtifact(artifact);
-					packages.add(pkg);
-					scmIds.add(artifact.getScmId());
-				}
-			}
-		}
-
-		Long[] tmp = scmIds.toArray(new Long[scmIds.size()]);
-		ScmResource[] scmResources = ResourceFactory.getResourceFactory().findScmResources(ArrayUtils.toPrimitive(tmp));
-
-		// Add SCMs to the appropriate packages
-		if(scmResources != null)
-		{
-			for(int i = 0; i < packages.size(); i++)
-			{
-				PackageDependency pkg = packages.get(i);
-				pkg.setScm(scmResources[i]);
-			}
-		}
-
-
-		// ALL packages are dependencies, not just the ones with SCMs
-		for (PackageDependency pkg : allPackages)
-		{
-			fireDependencyEvent(new DependencyEvent(file, pkg));
-		}
-
-		//		System.err.println("PKGs");
-		//		for(int i = 0; i < packages.size(); i++)
-		//		{
-		//			ScmResource scm = scmResources[i];
-		//			System.err.println("  * " + packages.get(i) + " " + scm);
-		//			
-		//			VulnerabilityResource[] vulnerabilities = scm.getVulnerabilities();
-		//			if(vulnerabilities != null)
-		//			{
-		//				for (VulnerabilityResource vulnerability : vulnerabilities)
-		//				{
-		//					System.err.println("    + " + vulnerability.getUri());
-		//				}
-		//			}
-		//			
-		//		}
-
-	}
-
 }
 
 

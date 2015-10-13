@@ -195,4 +195,15 @@ public class DependencyEvent implements IDependencyEvent
 		if(pkg != null) return pkg.getOptional();
 		return false;
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see net.ossindex.eclipse.builder.depends.IDependencyEvent#isRoot()
+	 */
+	@Override
+	public boolean isRoot()
+	{
+		if(pkg != null) return pkg.isRoot();
+		return false;
+	}
 }
