@@ -53,6 +53,8 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 	static
 	{
 		ignore.add("node_modules");
+		ignore.add("target");
+		ignore.add("bin");
 	}
 
 	/**

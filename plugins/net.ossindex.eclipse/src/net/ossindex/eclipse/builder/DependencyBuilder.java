@@ -91,6 +91,6 @@ public class DependencyBuilder extends CommonBuilder
 	@Override
 	protected String getName()
 	{
-		return "Dependency builder";
+		return "OSS Index";
 	}
 }
