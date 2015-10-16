@@ -329,5 +329,11 @@
             verticalRulerPreferenceValue="true">
       </specification>
    </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="net.ossindex.eclipse.Setup">
+      </startup>
+   </extension>
 
 </plugin>

@@ -206,7 +206,7 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 			IMarker m = null;
 			if(event.isRoot())
 			{
-				if(event.getOptional())
+				if(event.getOptional() || event.getArtifact() == null)
 				{
 					m = source.createMarker(OPTIONAL_DEPENDENCY_MARKER);
 				}
@@ -275,5 +275,14 @@ public class DependencyBuilderVisiter extends CommonBuildVisitor implements IDep
 		}
 
 	}
-
+	
+	/** We may want to get new data from the server when possible, so we will
+	 * want to talk to the server even when data has not changed.
+	 * 
+	 * @see net.ossindex.eclipse.common.builder.CommonBuildVisitor#useTimestamp()
+	 */
+	protected boolean useTimestamp()
+	{
+		return false;
+	}
 }

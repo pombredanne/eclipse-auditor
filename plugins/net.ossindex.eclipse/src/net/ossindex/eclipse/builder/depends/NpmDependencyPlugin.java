@@ -183,20 +183,27 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 	 */
 	private void reportDependencyInformation(IFile file, FilePosition position, PackageDependency rootPkg, ArtifactResource artifact) throws IOException
 	{
-		ArtifactResource[] deps = artifact.getDependencyGraph();
 		List<PackageDependency> allPackages = new LinkedList<PackageDependency>();
-		if(deps != null)
+		if(artifact != null)
 		{
-			for (ArtifactResource dep : deps)
+			ArtifactResource[] deps = artifact.getDependencyGraph();
+			if(deps != null)
 			{
-				PackageDependency pkg = new PackageDependency(position, "npm", dep.getPackageName(), dep.getVersionString());
-				pkg.setArtifact(dep);
-				if(rootPkg.getName().equals(dep.getPackageName()))
+				for (ArtifactResource dep : deps)
 				{
-					pkg.setIsRoot(true);
+					PackageDependency pkg = new PackageDependency(position, "npm", dep.getPackageName(), dep.getVersionString());
+					pkg.setArtifact(dep);
+					if(rootPkg.getName().equals(dep.getPackageName()))
+					{
+						pkg.setIsRoot(true);
+					}
+					allPackages.add(pkg);
 				}
-				allPackages.add(pkg);
 			}
+		}
+		else
+		{
+			allPackages.add(rootPkg);
 		}
 
 		List<Long> scmIds = new LinkedList<Long>();
@@ -204,12 +211,15 @@ public class NpmDependencyPlugin extends AbstractDependencyPlugin
 		for(PackageDependency pkg: allPackages)
 		{
 			ArtifactResource art = pkg.getArtifact();
-			long scmId = art.getScmId();
-			// only continue with the artifact if it has a known SCM id.
-			if(scmId > 0)
+			if(art != null)
 			{
-				packages.add(pkg);
-				scmIds.add(art.getScmId());
+				long scmId = art.getScmId();
+				// only continue with the artifact if it has a known SCM id.
+				if(scmId > 0)
+				{
+					packages.add(pkg);
+					scmIds.add(art.getScmId());
+				}
 			}
 		}
 
