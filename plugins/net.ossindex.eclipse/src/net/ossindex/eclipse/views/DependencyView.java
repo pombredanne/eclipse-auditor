@@ -1,5 +1,5 @@
 /**
- *	Copyright (c) 2015 Vör Security Inc.
+ *	Copyright (c) 2015 Vï¿½r Security Inc.
  *	All rights reserved.
  *	
  *	Redistribution and use in source and binary forms, with or without
@@ -122,7 +122,7 @@ public class DependencyView extends ViewPart implements ICursorListener
 		Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		SashForm form = new SashForm(composite, SWT.HORIZONTAL);
+		SashForm form = new SashForm(composite, SWT.VERTICAL);
 		form.setLayout(new FillLayout());
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		form.setBackground(form.getDisplay().getSystemColor( SWT.COLOR_GRAY));

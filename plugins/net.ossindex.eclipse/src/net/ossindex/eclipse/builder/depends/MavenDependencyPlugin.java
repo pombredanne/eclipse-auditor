@@ -1,5 +1,5 @@
 /**
- *	Copyright (c) 2015 Vör Security Inc.
+ *	Copyright (c) 2015 Vï¿½r Security Inc.
  *	All rights reserved.
  *	
  *	Redistribution and use in source and binary forms, with or without
@@ -189,7 +189,7 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 			for (Dependency dep : deps)
 			{
 				Artifact artifact = dep.getArtifact();
-				PackageDependency pkgDep = new PackageDependency(position, "maven", artifact.getArtifactId(), artifact.getVersion());
+				PackageDependency pkgDep = new PackageDependency(position, "maven", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
 				if(rootDep)
 				{
 					// First package is the root
@@ -201,7 +201,11 @@ public class MavenDependencyPlugin extends AbstractDependencyPlugin
 			}
 			reportDependencyInformation(resource, position, packageDependency.toArray(new PackageDependency[packageDependency.size()]));
 		}
-		catch(DependencyCollectionException | DependencyResolutionException | IOException e)
+		catch(DependencyResolutionException e)
+		{
+			System.err.println("WARNING: " + e.getMessage());
+		}
+		catch(DependencyCollectionException | IOException e)
 		{
 			e.printStackTrace();
 		}
