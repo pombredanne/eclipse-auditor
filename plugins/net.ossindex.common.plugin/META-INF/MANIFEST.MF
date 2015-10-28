@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Plugin
+Bundle-SymbolicName: net.ossindex.common.plugin
+Bundle-Version: 1.0.1.qualifier
+Bundle-Vendor: Vör Security Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
+ org.apache.commons.codec;bundle-version="1.6.0",
+ org.apache.httpcomponents.httpcore;bundle-version="4.3.3",
+ com.google.gson;bundle-version="2.2.4",
+ org.apache.commons.lang3;bundle-version="3.1.0",
+ org.apache.log4j;bundle-version="1.2.15",
+ net.ossindex.version;bundle-version="0.0.2",
+ org.mapdb;bundle-version="2.0.0",
+ org.slf4j.api;bundle-version="1.7.2",
+ org.eclipse.m2e.maven.runtime.slf4j.simple;bundle-version="1.5.1"
