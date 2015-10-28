@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OSS Index
-Bundle-SymbolicName: net.ossindex.eclipse;singleton:=true
+Bundle-SymbolicName: net.ossindex.eclipse.auditor;singleton:=true
 Bundle-Version: 0.0.1.qualifier
 Bundle-Activator: net.ossindex.eclipse.Activator
 Bundle-Vendor: Vör Security Inc.
@@ -9,7 +9,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
  net.ossindex.common;bundle-version="0.0.1",
- net.ossindex.eclipse.common;bundle-version="1.0.1",
+ net.ossindex.eclipse.common.builder;bundle-version="1.0.1",
  com.google.gson;bundle-version="2.2.4",
  org.apache.commons.codec;bundle-version="1.6.0",
  org.apache.commons.lang3;bundle-version="3.1.0",

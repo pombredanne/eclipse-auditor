@@ -28,14 +28,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&
    </license>
 
    <plugin
-         id="net.ossindex.common"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="net.ossindex.eclipse"
+         id="net.ossindex.eclipse.auditor"
          download-size="0"
          install-size="0"
          version="0.0.0"
