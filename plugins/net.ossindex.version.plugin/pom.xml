@@ -1,6 +1,7 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>ossindex-api</artifactId>
+	<artifactId>heuristic-version</artifactId>
 	<version>0.0.5</version>
 	<packaging>bundle</packaging>
 	<name>Heuristic Version OSGI Bundle</name>
@@ -21,6 +22,10 @@
 						<Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
 						<Import-Package>
 						</Import-Package>
+						<Require-Bundle>
+							org.slf4j.api;bundle-version="1.7.2",
+ 							com.github.zafarkhaja.semver;bundle-version="0.9.0"
+						</Require-Bundle>
 						<Export-Package>net.ossindex.version.*</Export-Package>
 						<Embed-Dependency>heuristic-version</Embed-Dependency>
 					</instructions>
