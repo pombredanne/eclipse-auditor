@@ -2,7 +2,7 @@
 <feature
       id="net.ossindex.version.feature"
       label="Heuristic Version Feature"
-      version="0.0.5.qualifier">
+      version="0.0.5">
 
    <description url="http://www.example.com/description">
       [Enter Feature Description here.]

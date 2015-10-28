@@ -1,9 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	
+  <parent>
+    <groupId>net.ossindex.eclipse.auditor</groupId>
+    <artifactId>plugins</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
+  </parent>
+
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>heuristic-version</artifactId>
+	<artifactId>net.ossindex.version.plugin</artifactId>
 	<version>0.0.5</version>
-	<packaging>bundle</packaging>
+	<packaging>eclipse-plugin</packaging>
 	<name>Heuristic Version OSGI Bundle</name>
 	<build>
 		<plugins>
