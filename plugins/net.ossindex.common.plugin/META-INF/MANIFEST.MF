@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Plugin
 Bundle-SymbolicName: net.ossindex.common.plugin
-Bundle-Version: 0.0.2
+Bundle-Version: 0.0.3
 Bundle-Vendor: Vör Security Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.apache.httpcomponents.httpclient;bundle-version="[4.1.0,5.0.0)",
