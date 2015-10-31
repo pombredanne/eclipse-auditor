@@ -6,13 +6,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>net.ossindex.eclipse.build</groupId>
+		<groupId>net.ossindex.eclipse.auditor</groupId>
 		<artifactId>plugins</artifactId>
 		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 
 	<groupId>net.ossindex.eclipse.plugins</groupId>
-	<artifactId>net.ossindex.eclipse.common.builder</artifactId>
+	<artifactId>net.ossindex.eclipse.auditor</artifactId>
 
 
 	<packaging>eclipse-plugin</packaging>

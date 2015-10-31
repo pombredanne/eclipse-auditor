@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Heuristic Version OSGI Plugin
-Bundle-SymbolicName: net.ossindex.version.plugin
-Bundle-Version: 0.0.5
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.slf4j.api;bundle-version="1.7.2",
- com.github.zafarkhaja.semver;bundle-version="0.9.0"

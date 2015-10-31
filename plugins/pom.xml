@@ -16,7 +16,6 @@
 
 
   <modules>
-    <module>net.ossindex.version.plugin</module>
-    <module>net.ossindex.common.plugin</module>
+    <module>net.ossindex.eclipse.auditor</module>
   </modules>
 </project>
