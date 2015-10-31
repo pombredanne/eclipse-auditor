@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>net.ossindex.common.plugin</artifactId>
 	<version>0.0.3</version>
-	<packaging>eclipse-plugin</packaging>
+	<packaging>bundle</packaging>
 	<name>OSSIndex API OSGI Bundle</name>
 	<build>
 		<plugins>
@@ -41,7 +41,12 @@
 							org.slf4j.api;bundle-version="1.7.2",
 							org.eclipse.m2e.maven.runtime.slf4j.simple;bundle-version="1.5.1"
 						</Require-Bundle>
-						<Export-Package>net.ossindex.common.*,net.ossindex.common.cache.*,net.ossindex.common.resource.*,net.ossindex.common.utils.*</Export-Package>
+						<Export-Package>
+							net.ossindex.common.*,
+							net.ossindex.common.cache.*,
+							net.ossindex.common.resource.*,
+							net.ossindex.common.utils.*
+						</Export-Package>
 						<Embed-Dependency>ossindex-api</Embed-Dependency>
 					</instructions>
 				</configuration>

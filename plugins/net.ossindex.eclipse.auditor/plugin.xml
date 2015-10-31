@@ -7,8 +7,8 @@
       <page
             name="OSS Index"
             nameFilter="*.*"
-            class="net.ossindex.eclipse.properties.OssIndexPropertyPage"
-            id="net.ossindex.eclipse.properties.OssIndexPropertyPage">
+            class="net.ossindex.eclipse.auditor.properties.OssIndexPropertyPage"
+            id="net.ossindex.eclipse.auditor.properties.OssIndexPropertyPage">
          <enabledWhen>
             <adapt
                   type="org.eclipse.core.resources.IFile">
@@ -20,9 +20,9 @@
          point="org.eclipse.ui.decorators">
       <decorator
             adaptable="true"
-            class="net.ossindex.eclipse.decorators.OssIndexDecorator"
+            class="net.ossindex.eclipse.auditor.decorators.OssIndexDecorator"
             icon="icons/ossi-decorator.png"
-            id="net.ossindex.eclipse.decorators.OssIndexDecorator"
+            id="net.ossindex.eclipse.auditor.decorators.OssIndexDecorator"
             label="OSS Index Decorator"
             lightweight="true"
             state="true">
@@ -40,7 +40,7 @@
       <builder
             hasNature="true">
          <run
-               class="net.ossindex.eclipse.builder.DependencyBuilder">
+               class="net.ossindex.eclipse.auditor.builder.DependencyBuilder">
          </run>
       </builder>
    </extension>
@@ -50,23 +50,23 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="net.ossindex.eclipse.builder.OssIndexNature">
+               class="net.ossindex.eclipse.auditor.builder.OssIndexNature">
          </run>
       </runtime>
       <builder
-            id="net.ossindex.eclipse.DependencyBuilder">
+            id="net.ossindex.eclipse.auditor.DependencyBuilder">
       </builder>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <category
-            id="net.ossindex.eclipse.OssIndexNature.category"
+            id="net.ossindex.eclipse.auditor.OssIndexNature.category"
             name="OSS Index Nature commands">
       </category>
       <command
-            categoryId="net.ossindex.eclipse.OssIndexNature.category"
-            defaultHandler="net.ossindex.eclipse.builder.AddRemoveOssIndexNatureHandler"
-            id="net.ossindex.eclipse.addRemoveOssIndexNature"
+            categoryId="net.ossindex.eclipse.auditor.OssIndexNature.category"
+            defaultHandler="net.ossindex.eclipse.auditor.builder.AddRemoveOssIndexNatureHandler"
+            id="net.ossindex.eclipse.auditor.addRemoveOssIndexNature"
             name="Add/Remove OSS Index Nature">
       </command>
    </extension>
@@ -75,7 +75,7 @@
       <menuContribution
             locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
          <command
-               commandId="net.ossindex.eclipse.addRemoveOssIndexNature"
+               commandId="net.ossindex.eclipse.auditor.addRemoveOssIndexNature"
                label="Disable OSS Index Nature"
                style="push">
             <visibleWhen
@@ -90,7 +90,7 @@
                            type="org.eclipse.core.resources.IProject">
                         <test
                               property="org.eclipse.core.resources.projectNature"
-                              value="net.ossindex.eclipse.OssIndexNature">
+                              value="net.ossindex.eclipse.auditor.OssIndexNature">
                         </test>
                      </adapt>
                   </iterate>
@@ -98,7 +98,7 @@
             </visibleWhen>
          </command>
          <command
-               commandId="net.ossindex.eclipse.addRemoveOssIndexNature"
+               commandId="net.ossindex.eclipse.auditor.addRemoveOssIndexNature"
                label="Enable OSS Index Nature"
                style="push">
             <visibleWhen
@@ -114,7 +114,7 @@
                         <not>
                            <test
                                  property="org.eclipse.core.resources.projectNature"
-                                 value="net.ossindex.eclipse.OssIndexNature">
+                                 value="net.ossindex.eclipse.auditor.OssIndexNature">
                            </test>
                         </not>
                      </adapt>
@@ -125,7 +125,7 @@
       </menuContribution>
    </extension>
    <extension
-         id="net.ossindex.eclipse.marker.DependencyMarker"
+         id="net.ossindex.eclipse.auditor.marker.DependencyMarker"
          name="Dependency"
          point="org.eclipse.core.resources.markers">
       <super
@@ -135,26 +135,26 @@
             value="true">
       </persistent>
       <attribute
-            name="net.ossindex.eclipse.marker.name">
+            name="net.ossindex.eclipse.auditor.marker.name">
       </attribute>
       <attribute
-            name="net.ossindex.eclipse.marker.version">
+            name="net.ossindex.eclipse.auditor.marker.version">
       </attribute>
       <attribute
-            name="net.ossindex.eclipse.marker.artifactId">
+            name="net.ossindex.eclipse.auditor.marker.artifactId">
       </attribute>
       <attribute
-            name="net.ossindex.eclipse.marker.scmId">
+            name="net.ossindex.eclipse.auditor.marker.scmId">
       </attribute>
       <attribute
-            name="net.ossindex.eclipse.marker.optional">
+            name="net.ossindex.eclipse.auditor.marker.optional">
       </attribute>
    </extension>
    <extension
          point="org.eclipse.ui.editors.annotationTypes">
       <type
-            markerType="net.ossindex.eclipse.marker.WarningDependencyMarker"
-            name="net.ossindex.eclipse.marker.WarningDependencyMarker">
+            markerType="net.ossindex.eclipse.auditor.marker.WarningDependencyMarker"
+            name="net.ossindex.eclipse.auditor.marker.WarningDependencyMarker">
       </type>
    </extension>
    <extension
@@ -168,13 +168,13 @@
             type="org.eclipse.core.resources.problemmarker">
       </super>
       <attribute
-            name="net.ossindex.eclipse.marker.url">
+            name="net.ossindex.eclipse.auditor.marker.url">
       </attribute>
       <attribute
-            name="net.ossindex.eclipse.marker.id">
+            name="net.ossindex.eclipse.auditor.marker.id">
       </attribute>
       <attribute
-            name="net.ossindex.eclipse.marker.summary">
+            name="net.ossindex.eclipse.auditor.marker.summary">
       </attribute>
    </extension>
    <extension
@@ -182,7 +182,7 @@
       <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
          <view
-               id="net.ossindex.eclipse.views.VulnerabilityView"
+               id="net.ossindex.eclipse.auditor.views.VulnerabilityView"
                ratio="0.5"
                relationship="right"
                relative="org.eclipse.ui.views.ProblemView">
@@ -192,147 +192,147 @@
    <extension
          point="org.eclipse.ui.views">
       <category
-            id="net.ossindex.eclipse"
+            id="net.ossindex.eclipse.auditor"
             name="OSS Index">
       </category>
       <view
-            category="net.ossindex.eclipse"
-            class="net.ossindex.eclipse.views.VulnerabilityView"
+            category="net.ossindex.eclipse.auditor"
+            class="net.ossindex.eclipse.auditor.views.VulnerabilityView"
             icon="icons/bug.png"
-            id="net.ossindex.eclipse.views.VulnerabilityView"
+            id="net.ossindex.eclipse.auditor.views.VulnerabilityView"
             name="Vulnerability">
       </view>
       <view
-            category="net.ossindex.eclipse"
-            class="net.ossindex.eclipse.views.DependencyView"
+            category="net.ossindex.eclipse.auditor"
+            class="net.ossindex.eclipse.auditor.views.DependencyView"
             icon="icons/chart_organisation.png"
-            id="net.ossindex.eclipse.views.DependencyView"
+            id="net.ossindex.eclipse.auditor.views.DependencyView"
             name="Dependencies">
       </view>
    </extension>
    <extension
-         id="net.ossindex.eclipse.marker.RootDependencyMarker"
+         id="net.ossindex.eclipse.auditor.marker.RootDependencyMarker"
          name="Dependency"
          point="org.eclipse.core.resources.markers">
       <super
-            type="net.ossindex.eclipse.marker.DependencyMarker">
+            type="net.ossindex.eclipse.auditor.marker.DependencyMarker">
       </super>
       <persistent
             value="true">
       </persistent>
       <attribute
-            name="net.ossindex.eclipse.marker.name">
+            name="net.ossindex.eclipse.auditor.marker.name">
       </attribute>
       <attribute
-            name="net.ossindex.eclipse.marker.version">
+            name="net.ossindex.eclipse.auditor.marker.version">
       </attribute>
       <attribute
-            name="net.ossindex.eclipse.marker.artifactId">
+            name="net.ossindex.eclipse.auditor.marker.artifactId">
       </attribute>
       <attribute
-            name="net.ossindex.eclipse.marker.scmId">
+            name="net.ossindex.eclipse.auditor.marker.scmId">
       </attribute>
       <attribute
-            name="net.ossindex.eclipse.marker.optional">
+            name="net.ossindex.eclipse.auditor.marker.optional">
       </attribute>
    </extension>
    <extension
          point="org.eclipse.ui.editors.annotationTypes">
       <type
-            markerType="net.ossindex.eclipse.marker.RootDependencyMarker"
-            name="net.ossindex.eclipse.marker.RootDependencyMarker">
+            markerType="net.ossindex.eclipse.auditor.marker.RootDependencyMarker"
+            name="net.ossindex.eclipse.auditor.marker.RootDependencyMarker">
       </type>
    </extension>
    <extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">
       <specification
-            annotationType="net.ossindex.eclipse.marker.RootDependencyMarker"
-            colorPreferenceKey="net.ossindex.eclipse.marker.color"
+            annotationType="net.ossindex.eclipse.auditor.marker.RootDependencyMarker"
+            colorPreferenceKey="net.ossindex.eclipse.auditor.marker.color"
             colorPreferenceValue="192,255,192"
             contributesToHeader="false"
-            highlightPreferenceKey="net.ossindex.eclipse.marker.highlight"
+            highlightPreferenceKey="net.ossindex.eclipse.auditor.marker.highlight"
             highlightPreferenceValue="true"
             includeOnPreferencePage="true"
             label="Root Dependency Marker"
-            overviewRulerPreferenceKey="net.ossindex.eclipse.marker.overview"
+            overviewRulerPreferenceKey="net.ossindex.eclipse.auditor.marker.overview"
             overviewRulerPreferenceValue="true"
             presentationLayer="0"
-            textPreferenceKey="net.ossindex.eclipse.marker.text"
+            textPreferenceKey="net.ossindex.eclipse.auditor.marker.text"
             textPreferenceValue="true"
             textStylePreferenceValue="BOX"
-            verticalRulerPreferenceKey="net.ossindex.eclipse.marker.ruler"
+            verticalRulerPreferenceKey="net.ossindex.eclipse.auditor.marker.ruler"
             verticalRulerPreferenceValue="true">
       </specification>
    </extension>
    <extension
-         id="net.ossindex.eclipse.marker.OptionalDependencyMarker"
+         id="net.ossindex.eclipse.auditor.marker.OptionalDependencyMarker"
          name="Optional Dependency"
          point="org.eclipse.core.resources.markers">
       <super
-            type="net.ossindex.eclipse.marker.DependencyMarker">
+            type="net.ossindex.eclipse.auditor.marker.DependencyMarker">
       </super>
    </extension>
    <extension
          point="org.eclipse.ui.editors.annotationTypes">
       <type
-            markerType="net.ossindex.eclipse.marker.OptionalDependencyMarker"
-            name="net.ossindex.eclipse.marker.OptionalDependencyMarker">
+            markerType="net.ossindex.eclipse.auditor.marker.OptionalDependencyMarker"
+            name="net.ossindex.eclipse.auditor.marker.OptionalDependencyMarker">
       </type>
    </extension>
    <extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">
       <specification
-            annotationType="net.ossindex.eclipse.marker.OptionalDependencyMarker"
-            colorPreferenceKey="net.ossindex.eclipse.omarker.color"
+            annotationType="net.ossindex.eclipse.auditor.marker.OptionalDependencyMarker"
+            colorPreferenceKey="net.ossindex.eclipse.auditor.omarker.color"
             colorPreferenceValue="192,192,255"
             contributesToHeader="false"
-            highlightPreferenceKey="net.ossindex.eclipse.omarker.highlight"
+            highlightPreferenceKey="net.ossindex.eclipse.auditor.omarker.highlight"
             highlightPreferenceValue="true"
             includeOnPreferencePage="true"
             label="Optional Dependency Marker"
-            overviewRulerPreferenceKey="net.ossindex.eclipse.omarker.overview"
+            overviewRulerPreferenceKey="net.ossindex.eclipse.auditor.omarker.overview"
             overviewRulerPreferenceValue="true"
             presentationLayer="0"
-            textPreferenceKey="net.ossindex.eclipse.omarker.text"
+            textPreferenceKey="net.ossindex.eclipse.auditor.omarker.text"
             textPreferenceValue="true"
             textStylePreferenceValue="BOX"
-            verticalRulerPreferenceKey="net.ossindex.eclipse.omarker.ruler"
+            verticalRulerPreferenceKey="net.ossindex.eclipse.auditor.omarker.ruler"
             verticalRulerPreferenceValue="true">
       </specification>
    </extension>
    <extension
-         id="net.ossindex.eclipse.marker.WarningDependencyMarker"
+         id="net.ossindex.eclipse.auditor.marker.WarningDependencyMarker"
          name="Old Dependency"
          point="org.eclipse.core.resources.markers">
       <super
-            type="net.ossindex.eclipse.marker.DependencyMarker">
+            type="net.ossindex.eclipse.auditor.marker.DependencyMarker">
       </super>
    </extension>
    <extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">
       <specification
-            annotationType="net.ossindex.eclipse.marker.WarningDependencyMarker"
-            colorPreferenceKey="net.ossindex.eclipse.wmarker.color"
+            annotationType="net.ossindex.eclipse.auditor.marker.WarningDependencyMarker"
+            colorPreferenceKey="net.ossindex.eclipse.auditor.wmarker.color"
             colorPreferenceValue="255,255,192"
             contributesToHeader="false"
-            highlightPreferenceKey="net.ossindex.eclipse.wmarker.highlight"
+            highlightPreferenceKey="net.ossindex.eclipse.auditor.wmarker.highlight"
             highlightPreferenceValue="true"
             includeOnPreferencePage="true"
             label="Warning Dependency Marker"
-            overviewRulerPreferenceKey="net.ossindex.eclipse.wmarker.overview"
+            overviewRulerPreferenceKey="net.ossindex.eclipse.auditor.wmarker.overview"
             overviewRulerPreferenceValue="true"
             presentationLayer="0"
-            textPreferenceKey="net.ossindex.eclipse.wmarker.text"
+            textPreferenceKey="net.ossindex.eclipse.auditor.wmarker.text"
             textPreferenceValue="true"
             textStylePreferenceValue="BOX"
-            verticalRulerPreferenceKey="net.ossindex.eclipse.wmarker.ruler"
+            verticalRulerPreferenceKey="net.ossindex.eclipse.auditor.wmarker.ruler"
             verticalRulerPreferenceValue="true">
       </specification>
    </extension>
    <extension
          point="org.eclipse.ui.startup">
       <startup
-            class="net.ossindex.eclipse.Setup">
+            class="net.ossindex.eclipse.auditor.Setup">
       </startup>
    </extension>
 

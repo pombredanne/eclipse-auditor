@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>net.ossindex.version.plugin</artifactId>
 	<version>0.0.5</version>
-	<packaging>eclipse-plugin</packaging>
+	<packaging>bundle</packaging>
 	<name>Heuristic Version OSGI Bundle</name>
 	<build>
 		<plugins>

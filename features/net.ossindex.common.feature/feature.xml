@@ -2,7 +2,7 @@
 <feature
       id="net.ossindex.common.feature"
       label="OSS Index API Feature"
-      version="0.0.2.qualifier"
+      version="0.0.3"
       provider-name="Vör Security Inc.">
 
    <description url="http://www.example.com/description">

@@ -6,16 +6,16 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>net.ossindex.eclipse.auditor</groupId>
-		<artifactId>features</artifactId>
+		<groupId>net.ossindex.eclipse.build</groupId>
+		<artifactId>plugins</artifactId>
 		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 
-	<groupId>net.ossindex.eclipse.features</groupId>
-	<artifactId>net.ossindex.common.feature</artifactId>
-	<version>0.0.3</version>
+	<groupId>net.ossindex.eclipse.plugins</groupId>
+	<artifactId>net.ossindex.eclipse.common.builder</artifactId>
 
-	<packaging>eclipse-feature</packaging>
 
-	<name>OSS Index API Feature</name>
+	<packaging>eclipse-plugin</packaging>
+
+	<name>OSS Index Eclipse Common Builder</name>
 </project>
