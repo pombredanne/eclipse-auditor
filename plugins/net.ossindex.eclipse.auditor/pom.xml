@@ -18,4 +18,5 @@
 	<packaging>eclipse-plugin</packaging>
 
 	<name>OSS Index Eclipse Common Builder</name>
+	<version>0.0.1-SNAPSHOT</version>
 </project>

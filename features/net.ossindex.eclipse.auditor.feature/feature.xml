@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="net.ossindex.eclipse.feature"
-      label="OSS Index Core Feature"
-      version="0.0.1.qualifier">
+      id="net.ossindex.eclipse.auditor.feature"
+      label="OSS Index Auditor Feature"
+      version="0.0.1.qualifier"
+      provider-name="Vör Security Inc.">
 
    <description url="http://ossindex.net/eclipse">
       OSS Index Eclipse integration

@@ -13,7 +13,6 @@
   <name>OSS Index Eclipse features</name>
   <packaging>pom</packaging>
   <modules>
-      <module>net.ossindex.common.feature</module>
-      <module>net.ossindex.version.feature</module>
+      <module>net.ossindex.eclipse.auditor.feature</module>
   </modules>
 </project>

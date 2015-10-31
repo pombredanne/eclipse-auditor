@@ -12,10 +12,11 @@
 	</parent>
 
 	<groupId>net.ossindex.eclipse.features</groupId>
-	<artifactId>net.ossindex.common.feature</artifactId>
-	<version>0.0.3</version>
+	<artifactId>net.ossindex.eclipse.auditor.feature</artifactId>
+
 
 	<packaging>eclipse-feature</packaging>
 
-	<name>OSS Index API Feature</name>
+	<name>OSS Index Eclipse Auditor Feature</name>
+	<version>0.0.1-SNAPSHOT</version>
 </project>

@@ -2,6 +2,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>net.ossindex</groupId>
+    <artifactId>eclipse</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
+  </parent>
+
   <groupId>net.ossindex.eclipse</groupId>
   <artifactId>auditor</artifactId>
   <version>1.0.1-SNAPSHOT</version>
@@ -10,169 +16,8 @@
 
   <packaging>pom</packaging>
 
-  <properties>
-    <junit-version>4.8.1</junit-version>
-    <tycho-version>0.23.0</tycho-version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
- </properties>
-
   <modules>
     <module>plugins</module>
-    <!--
     <module>features</module>
-    <module>sites</module>
-    -->
   </modules>
-
-  <repositories>
-    <repository>
-       <id>eclipse-juno</id>
-       <url>http://download.eclipse.org/releases/juno</url>
-       <layout>p2</layout>
-    </repository>
-    <repository>
-       <id>m2e</id>
-       <url>http://download.eclipse.org/technology/m2e/releases</url>
-       <layout>p2</layout>
-    </repository>
-    <repository>
-       <id>orbit-juno</id>
-       <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20130118183705/repository/</url>
-       <layout>p2</layout>
-    </repository>
-    <repository>
-       <id>OSS Index Dependencies</id>
-       <url>http://vorsecurity.com/eclipse/ossindex/deps/</url>
-       <layout>p2</layout>
-    </repository>
-  </repositories>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-maven-plugin</artifactId>
-        <version>${tycho-version}</version>
-        <extensions>true</extensions>
-      </plugin>
-    </plugins>
-
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.eclipse.tycho</groupId>
-          <artifactId>tycho-compiler-plugin</artifactId>
-          <version>${tycho-version}</version>
-          <configuration>
-            <encoding>UTF-8</encoding>
-          </configuration>
-        </plugin>
-		<!--
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>build-helper-maven-plugin</artifactId>
-          <version>1.7</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-antrun-plugin</artifactId>
-          <version>1.7</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.2.1</version>
-        </plugin>
-		-->
-        <plugin>
-          <groupId>org.eclipse.tycho</groupId>
-          <artifactId>target-platform-configuration</artifactId>
-          <version>${tycho-version}</version>
-          <configuration>
-            <environments>
-              <environment>
-                <os>win32</os>
-                <ws>win32</ws>
-                <arch>x86_64</arch>
-              </environment>
-              <environment>
-                <os>linux</os>
-                <ws>gtk</ws>
-                <arch>x86_64</arch>
-              </environment>
-            </environments>
-          </configuration>
-        </plugin>
-		
-						<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.eclipse.tycho
-										</groupId>
-										<artifactId>
-											tycho-compiler-plugin
-										</artifactId>
-										<versionRange>
-											[0.23.0,)
-										</versionRange>
-										<goals>
-											<goal>compile</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.eclipse.tycho
-										</groupId>
-										<artifactId>
-											tycho-packaging-plugin
-										</artifactId>
-										<versionRange>
-											[0.23.0,)
-										</versionRange>
-										<goals>
-											<goal>build-qualifier</goal>
-											<goal>validate-id</goal>
-											<goal>
-												validate-version
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-
-      </plugins>
-
-    </pluginManagement>
-  </build>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>${junit-version}</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
 </project>
